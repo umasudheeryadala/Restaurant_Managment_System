@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <!-- added constraints for entity payments -->
+    <changeSet id="202505221429-2" author="sudheer.yadala">
+        <addForeignKeyConstraint baseTableName="payment" baseColumnNames="order_id"
+                                 constraintName="fk_payments__order_id" referencedTableName="orders"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

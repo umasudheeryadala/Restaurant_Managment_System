@@ -1,0 +1,38 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <property name="datetimeType" value="datetime(6)" dbms="mysql, mariadb" />
+    <property name="datetimeType" value="datetime" dbms="postgresql,h2" />
+    <property name="clobType" value="longvarchar" dbms="h2" />
+    <property name="clobType" value="clob" dbms="mysql, oracle, postgresql" />
+    <property name="blobType" value="bytea" dbms="postgresql" />
+    <property name="blobType" value="blob" dbms="mysql,oracle,mariadb"/>
+
+    <include file="config/liquibase/changelog/000000000000_initial_schema.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221436_added_entity_tables.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221435_added_entity_employee.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221429_added_entity_payment.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221430_added_entity_order_item.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221431_added_entity_orders.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221432_added_entity_ingredient.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221433_added_entity_menu_category.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221434_added_entity_menu_item.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221428_added_entity_image.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221427_added_entity_booking.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221426_added_entity_restaurant.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221425_added_entity_availability.xml" relativeToChangelogFile="false" />
+
+    <!-- constraints of the entity -->
+
+    <include file="config/liquibase/changelog/202505221426_added_entity_constraints_restaurant.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221436_added_entity_constraints_tables.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221429_added_entity_constraints_payment.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221430_added_entity_constraints_order_item.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221431_added_entity_constraints_orders.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221432_added_entity_constraints_menu_item_ingredients.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221434_added_entity_constraints_menu_item.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221428_added_entity_constraints_image.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221427_added_entity_constraints_booking.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221425_added_entity_constraints_availability.xml" relativeToChangelogFile="false" />
+    <include file="config/liquibase/changelog/202505221433_added_entity_constraints_menu_category.xml" relativeToChangelogFile="false" />
+</databaseChangeLog>

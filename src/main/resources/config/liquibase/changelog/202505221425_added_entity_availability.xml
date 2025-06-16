@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- added entity availability -->
+    <changeSet id="202505221425" author="sudheer.yadala">
+        <createTable tableName="availability">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="holiday_date" type="${dateTimeType}">
+                <constraints nullable="true"/>
+            </column>
+            <column name="day" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="startDateTime" type="${dateTimeType}">
+                <constraints nullable="true"/>
+            </column>
+            <column name="endDateTime" type="${dateTimeType}">
+                <constraints nullable="true"/>
+            </column>
+            <column name="restaurant_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

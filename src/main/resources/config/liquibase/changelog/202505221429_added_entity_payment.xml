@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <!-- added entity payments -->
+    <changeSet id="202505221429" author="sudheer.yadala">
+        <createTable tableName="payment">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="bill_url" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="total_amount" type="DECIMAL(10,2)">
+                <constraints nullable="true" />
+            </column>
+            <column name="payment_method" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="payment_time" type="${datetimeType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="payment_status" type="varchar(255)" >
+                <constraints nullable="true" />
+            </column>
+            <column name="order_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

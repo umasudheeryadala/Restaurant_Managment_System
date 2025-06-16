@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- added constraints for entity menu items -->
+    <changeSet id="202505221343-2" author="sudhee.yadala">
+        <addForeignKeyConstraint baseTableName="menu_items" baseColumnNames="category_id"
+                                 constraintName="fk_menu_items__category_id" referencedTableName="menu_category"
+                                 referencedColumnNames="id" />
+    </changeSet>
+</databaseChangeLog>

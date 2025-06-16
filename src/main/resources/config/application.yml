@@ -1,0 +1,68 @@
+server:
+  port: 5200
+  ssl:
+    enabled=false:
+spring:
+  redis:
+    host: localhost
+    port: 6379
+  application:
+    name: restaurantManagement
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:postgresql://localhost:5432/restaurantmanagement
+    username: postgres
+    password: postgres
+    hikari:
+      poolName: hikari
+      auto-commit: false
+  liquibase:
+    change-log: classpath:config/liquibase/master.xml
+  jpa:
+    show-sql: true
+    properties:
+      hibernate.jdbc.time_zone: UTC
+      hibernate.id.new_generator_mapping: true
+      hibernate.connection.provider.disables_autocommit: true
+      hibernate.generate_statistics: false
+      hibernate.jdbc.batch_size: 250
+      hibernate.order_inserts: true
+      hibernate.order_update: true
+      hibernate.query.fail_on_pagination_over_collection_fetch: true
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+      format_sql: true
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+  security:
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: http://localhost:8080/realms/RestaurantMangment
+        registration:
+          oidc:
+            client-id: web-app
+            client-secret: web-app
+            scope: openid
+
+logging:
+  level:
+    ROOT: DEBUG
+    org.hibernate.SQL: DEBUG
+    com.tastes_of_india.restaurantManagement: DEBUG
+    liquibase: DEBUG
+    org.apache.tomcat: INFO
+    org.apache.coyote: INFO
+
+application:
+  keycloak_access_token_url: http://localhost:8080/realms/RestaurantMangment/protocol/openid-connect/token
+  keycloak_password_update_url: http://localhost:8080/admin/realms/RestaurantMangment/users/{userId}/reset-password
+  keycloak_admin_user_name: admin
+  keycloak_admin_password: admin
+  keycloak_client_id: web-app
+  keycloak_client_secret: web-app
+  grant_type: password
+  clientSecret: ZgXMYwvHBblsT+KCSzeFmVHQkrNFW/BigAg5jcEb0KzEVc5WYikxONfj14HT9S9h

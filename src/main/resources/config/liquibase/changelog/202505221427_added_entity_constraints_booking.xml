@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="202505221427-2" author="sudheer.yadala">
+        <addForeignKeyConstraint baseTableName="booking" baseColumnNames="table_id"
+                                 constraintName="fk_booking__table_id" referencedTableName="tables"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>

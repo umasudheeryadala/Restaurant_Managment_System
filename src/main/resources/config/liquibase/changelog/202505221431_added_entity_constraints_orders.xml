@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <!-- added constraints for entity order -->
+    <changeSet id="202505221431-2" author="sudheer.yadal">
+        <addForeignKeyConstraint baseTableName="orders" baseColumnNames="table_id" constraintName="fk_orders__table_id"
+                                 referencedTableName="tables"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>
