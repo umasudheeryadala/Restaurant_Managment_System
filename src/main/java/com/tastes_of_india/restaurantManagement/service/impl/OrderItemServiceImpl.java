@@ -15,6 +15,11 @@ import com.tastes_of_india.restaurantManagement.service.OrderItemService;
 import com.tastes_of_india.restaurantManagement.service.dto.CartItemDTO;
 import com.tastes_of_india.restaurantManagement.service.dto.OrderItemDTO;
 import com.tastes_of_india.restaurantManagement.service.mapper.OrderItemMapper;
+import com.tastes_of_india.restaurantManagement.service.util.OrderContext;
+import com.tastes_of_india.restaurantManagement.service.util.OrderItemContext;
+import com.tastes_of_india.restaurantManagement.service.util.OrderItemStatusFactory;
+import com.tastes_of_india.restaurantManagement.service.util.OrderStatusFactory;
+import com.tastes_of_india.restaurantManagement.web.rest.StreamResource;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -45,13 +50,16 @@ public class OrderItemServiceImpl implements OrderItemService {
 
     private final RestaurantRepository restaurantRepository;
 
-    public OrderItemServiceImpl(OrderItemRepository orderItemRepository, OrderRepository orderRepository, MenuItemRepository menuItemRepository, OrderItemMapper orderItemMapper, CartService cartService, RestaurantRepository restaurantRepository) {
+    private final StreamResource streamResource;
+
+    public OrderItemServiceImpl(OrderItemRepository orderItemRepository, OrderRepository orderRepository, MenuItemRepository menuItemRepository, OrderItemMapper orderItemMapper, CartService cartService, RestaurantRepository restaurantRepository, StreamResource streamResource) {
         this.orderItemRepository = orderItemRepository;
         this.orderRepository = orderRepository;
         this.menuItemRepository = menuItemRepository;
         this.orderItemMapper = orderItemMapper;
         this.cartService = cartService;
         this.restaurantRepository = restaurantRepository;
+        this.streamResource = streamResource;
     }
 
 
@@ -84,56 +92,59 @@ public class OrderItemServiceImpl implements OrderItemService {
                  orderItem.setQuantity(itemIds.get(menuItem.getId()).getQuantity());
                  orderItem.setOrder(order);
                  orderItem.setInstructions(itemIds.get(menuItem.getId()).getInstructions());
-                 orderItem.setStatus(OrderItemStatus.ORDERED);
+                 orderItem.setStatus(new OrderItemContext().getStateName());
                  orderItem.setCreatedDate(ZonedDateTime.now());
                  orderItems.add(orderItem);
              }
-             return orderItemRepository.saveAllAndFlush(orderItems).stream().map(orderItemMapper::toDto).toList();
+             List<OrderItemDTO> orderItemDTOS= orderItemRepository.saveAllAndFlush(orderItems).stream().map(orderItemMapper::toDto).toList();
+             sendNotification(restaurantId,orderItemDTOS.stream().map(OrderItemDTO::getId).toList());
+             return  orderItemDTOS;
          }
     }
 
     @Override
-    public OrderItemDTO cancelOrderItem(Long orderId, Long itemId) throws BadRequestAlertException {
-        OrderItem orderItem=orderItemRepository.findByIdAndOrderIdAndStatus(itemId,orderId,OrderItemStatus.ORDERED).orElseThrow(
-                () -> new BadRequestAlertException("Order Item Can't be Cancelled",ENTITY_NAME,"orderItemCannotBeCancelled")
+    public OrderItemDTO cancelOrderItem(Long itemId) throws BadRequestAlertException {
+        OrderItem orderItem=orderItemRepository.findById(itemId).orElseThrow(
+                () -> new BadRequestAlertException("Order Item Not Found",ENTITY_NAME,"orderItemNotFound")
         );
-
-        if(ZonedDateTime.now().isAfter(orderItem.getCreatedDate().plusMinutes(10))){
-            throw new BadRequestAlertException("Cancellation Time Exceeded",ENTITY_NAME,"timeExceeded");
-        }
-        orderItem.setStatus(OrderItemStatus.CANCELLED);
+        OrderItemContext itemState=OrderItemStatusFactory.getInstance().getOrderState(orderItem.getStatus());
+        itemState.cancel();
+        orderItem.setStatus(itemState.getStateName());
         orderItemRepository.saveAndFlush(orderItem);
         return orderItemMapper.toDto(orderItem);
     }
 
     @Override
     public void cancelOrderItems(List<OrderItem> orderItems) throws BadRequestAlertException {
+        OrderItemStatusFactory statusFactory=OrderItemStatusFactory.getInstance();
         for(OrderItem orderItem:orderItems){
-            if(orderItem.getStatus()!=OrderItemStatus.ORDERED){
-                throw new BadRequestAlertException("Order Item In Process Cannot Able to Cancel",ENTITY_NAME,"orderCannotBeCanceled");
-            }
+            OrderItemContext orderItemContext=statusFactory.getOrderState(orderItem.getStatus());
+            orderItemContext.cancel();
         }
         orderItems.stream().forEach(orderItem -> orderItem.setStatus(OrderItemStatus.CANCELLED));
         orderItemRepository.saveAllAndFlush(orderItems);
     }
 
     @Override
-    public OrderItemDTO updateOrderItemStatus(Long orderItemId, OrderItemStatus orderItemStatus) throws BadRequestAlertException {
+    public OrderItemDTO updateOrderItemStatus(Long orderItemId) throws BadRequestAlertException {
 
-        OrderItem orderItem=orderItemRepository.findByIdAndStatusNotIn(orderItemId, Arrays.asList(OrderItemStatus.DELIVERED,OrderItemStatus.CANCELLED)).orElseThrow(
+        OrderItem orderItem=orderItemRepository.findById(orderItemId).orElseThrow(
                 () -> new BadRequestAlertException("Order May be Delivered Or Cancelled",ENTITY_NAME,"orderNotFound")
         );
 
         Order order=orderItem.getOrder();
-        if(order.getStatus()==OrderStatus.CANCELLED){
-            throw new BadRequestAlertException("Order Cancelled",ENTITY_NAME,"orderCancelled");
+
+        OrderContext orderContext= OrderStatusFactory.getInstance().getOrderState(order.getStatus());
+        orderContext.canPerformUpdate();
+        if(order.getStatus()==OrderStatus.ORDERED){
+            orderContext.next();
+            order.setStatus(orderContext.getOrderState());
+            orderRepository.save(order);
         }
-        if(order.getStatus()==OrderStatus.DELIVERED){
-            throw new BadRequestAlertException("Order Delivered",ENTITY_NAME,"orderDelivered");
-        }
-        order.setStatus(OrderStatus.IN_PROGRESS);
-        orderRepository.saveAndFlush(order);
-        orderItem.setStatus(orderItemStatus);
+        OrderItemContext itemState=OrderItemStatusFactory.getInstance().getOrderState(orderItem.getStatus());
+        itemState.next();
+        orderItem.setStatus(itemState.getStateName());
+        sendNotification(order.getTable().getId(),orderItemId,itemState.getStateName());
         return orderItemMapper.toDto(orderItemRepository.saveAndFlush(orderItem));
     }
 
@@ -147,5 +158,47 @@ public class OrderItemServiceImpl implements OrderItemService {
         List<OrderItem> orderItems=orderItemRepository.findAllByOrderIdAndOrderTableRestaurantId(orderId,restaurantId);
 
         return orderItems.stream().map(orderItemMapper::toDto).toList();
+    }
+
+    @Override
+    public List<OrderItemDTO> findAllOrderItemsByOrderId(Long orderId) {
+
+        List<OrderItem> orderItems=orderItemRepository.findByOrderId(orderId);
+
+        return orderItems.stream().map(orderItemMapper::toDto).toList();
+    }
+
+    @Override
+    public List<OrderItemDTO> findAllOrderItemsByRestaurantId(Long restaurantId) {
+        List<OrderItem> orderItems=orderItemRepository.findByOrderTableRestaurantId(restaurantId);
+
+        return orderItems.stream().map(orderItemMapper::toDto).toList();
+    }
+
+    @Override
+    public void checkStatusOfOrderItems(Long orderId) throws BadRequestAlertException {
+        List<OrderItem> orderItems=orderItemRepository.findByOrderId(orderId);
+        for(OrderItem orderItem:orderItems){
+            OrderItemContext context=OrderItemStatusFactory.getInstance().getOrderState(orderItem.getStatus());
+            if(!context.canProcessPayment()) {
+                throw new BadRequestAlertException("Some of the Order Items are Not Delivered", ENTITY_NAME, "itemsNotDelivered");
+            }
+        }
+    }
+
+    private void sendNotification(Long orderId,Long orderItemId,OrderItemStatus orderItemStatus){
+        if(orderItemStatus.equals(OrderItemStatus.PREPARING)){
+            streamResource.notifyOrderUpdate(orderId,"Item with Id: "+orderItemId+" started preparing");
+        } else if (orderItemStatus.equals(OrderItemStatus.CANCELLED)) {
+            streamResource.notifyOrderUpdate(orderId,"Item with Id: "+orderItemId+" cancelled");
+        }else if(orderItemStatus.equals(OrderItemStatus.DELIVERED)){
+            streamResource.notifyOrderUpdate(orderId,"Item with Id: "+orderItemId+" delivered successfully");
+        }
+    }
+
+    private void sendNotification(Long id, List<Long> orderItemIds){
+        for (Long orderItemId:orderItemIds) {
+            streamResource.notifyOrderUpdate(id, "Order Received with id : " + orderItemId);
+        }
     }
 }

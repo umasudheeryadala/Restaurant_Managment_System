@@ -121,10 +121,16 @@ public class EmployeeServiceImpl implements EmployeeService {
             loginId = token.getToken().getClaims().get("sub").toString();
 
         }
+
+        if(authentication instanceof OAuth2AuthenticationToken token){
+            loginId=token.getPrincipal().getName();
+        }
         if (loginId != null) {
             Optional<Employee> employee = employeeRepository.findByLoginId(loginId);
             if (employee.isPresent()) return employee.get();
         }
+        LOG.debug("authentication context {} {}",authentication,loginId);
+
         throw new BadRequestAlertException("user not found", ENTITY_NAME, "userNotFound");
     }
 
@@ -213,6 +219,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public boolean checkPermission(Designation[] designations,Long restaurantId) throws BadRequestAlertException {
         Employee employee=getCurrentlyLoggedInUser();
+        LOG.debug("employeeId: {}",employee.getId());
         RestaurantEmployee restaurantEmployee=restaurantEmployeeRepository.findByRestaurantIdAndEmployeeId(restaurantId,employee.getId()).orElseThrow(
                 () ->new BadRequestAlertException("Employee Doesn't Belong to This Restaurant",ENTITY_NAME,"employeeDoesNotBelongToRestaurant")
         );

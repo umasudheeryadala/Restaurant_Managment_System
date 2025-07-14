@@ -5,6 +5,7 @@ import com.tastes_of_india.restaurantManagement.domain.enumeration.Designation;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.TableStatus;
 import com.tastes_of_india.restaurantManagement.service.TableService;
 import com.tastes_of_india.restaurantManagement.service.dto.TableBasicDTO;
+import com.tastes_of_india.restaurantManagement.service.dto.TableDTO;
 import com.tastes_of_india.restaurantManagement.service.util.PaginationUtil;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ public class RestaurantTableResource {
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
+
     @AuthorizeApiAccess(designation = {Designation.OWNER,Designation.MANAGER})
     @PostMapping("/restaurants/{restaurantId}/tables")
     public ResponseEntity<TableBasicDTO> saveRestaurantTable(@PathVariable Long restaurantId, @RequestBody TableBasicDTO table) throws BadRequestAlertException {
@@ -49,7 +51,7 @@ public class RestaurantTableResource {
 
     @AuthorizeApiAccess(designation = {Designation.MANAGER,Designation.OWNER})
     @PutMapping("restaurants/{restaurantId}/tables/{tableId}")
-    public ResponseEntity<TableBasicDTO> updateRestaurantTable(@PathVariable Long tableId, @PathVariable Long restaurantId, @RequestBody TableBasicDTO tableBasicDTO) throws BadRequestAlertException {
+    public ResponseEntity<TableBasicDTO> updateRestaurantTable(@PathVariable Long restaurantId,@PathVariable Long tableId, @RequestBody TableBasicDTO tableBasicDTO) throws BadRequestAlertException {
         if (tableBasicDTO.getId() == null) {
             throw new BadRequestAlertException("Id Not Found", ENTITY_NAME, "idNotFound");
         }

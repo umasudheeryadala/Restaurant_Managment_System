@@ -24,8 +24,10 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
 
     Optional<Order> findByIdAndStatus(Long orderId,OrderStatus orderStatus);
 
-    @Query(value = "Select order from Order order where (?2 is null or order.tableId=?2) and (?3 is null or order.createdDate>= ?3) and (?4 is null or order.createdDate<=?4) and (?5 is null or order.orderType=?5) and (?6 is null or order.status=?6) and order.id in " +
+    @Query(value = "Select order from Order order where (?2 is null or order.table.id=?2) and (?3 is null or order.orderType=?3) and (?4 is null or order.status=?4) and order.id in " +
             "(select o.id from Tables table left join Order o on table.id=o.table.id where table.restaurant.id=?1 )")
-    Page<Order> findAllByRestaurantIdAndTableId(Long restaurantId,Long tableId, ZonedDateTime startDateTime, ZonedDateTime endDateTime, OrderType orderType, OrderStatus orderStatus, Pageable pageable);
+    Page<Order> findAllByRestaurantIdAndTableId(Long restaurantId,Long tableId, OrderType orderType, OrderStatus orderStatus, Pageable pageable);
+
+    Optional<Order> findByIdAndTableRestaurantId(Long orderId,Long restaurantId);
 
 }

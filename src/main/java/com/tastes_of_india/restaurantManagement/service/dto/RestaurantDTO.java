@@ -9,6 +9,8 @@ public class RestaurantDTO {
 
     private String name;
 
+    private Boolean deleted;
+
     private RestaurantType type;
 
     private String address;
@@ -31,6 +33,13 @@ public class RestaurantDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     public RestaurantType getType() {

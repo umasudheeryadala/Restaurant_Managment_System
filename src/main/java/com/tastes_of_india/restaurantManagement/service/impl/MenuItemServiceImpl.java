@@ -1,5 +1,6 @@
 package com.tastes_of_india.restaurantManagement.service.impl;
 
+import com.tastes_of_india.restaurantManagement.service.mapper.ImageMapper;
 import com.tastes_of_india.restaurantManagement.service.util.FileUtil;
 import com.tastes_of_india.restaurantManagement.domain.Image;
 import com.tastes_of_india.restaurantManagement.domain.MenuCategory;
@@ -41,17 +42,20 @@ public class MenuItemServiceImpl implements MenuItemService {
 
     private final ImageRepository imageRepository;
 
-    public MenuItemServiceImpl(MenuItemRepository menuItemRepository, MenuItemMapper menuItemMapper, MenuCategoryRepository menuCategoryRepository, ImageRepository imageRepository) {
+    private final ImageMapper imageMapper;
+
+    public MenuItemServiceImpl(MenuItemRepository menuItemRepository, MenuItemMapper menuItemMapper, MenuCategoryRepository menuCategoryRepository, ImageRepository imageRepository, ImageMapper imageMapper) {
         this.menuItemRepository = menuItemRepository;
         this.menuItemMapper = menuItemMapper;
         this.menuCategoryRepository = menuCategoryRepository;
         this.imageRepository = imageRepository;
+        this.imageMapper = imageMapper;
     }
 
     @Override
     public MenuItemDTO saveMenuItem(Long restaurantId,MenuItemDTO menuItem, Long categoryId) throws IOException, BadRequestAlertException {
 
-        MenuCategory menuCategory = menuCategoryRepository.findByIdAndRestaurantId(restaurantId,categoryId).orElseThrow(
+        MenuCategory menuCategory = menuCategoryRepository.findByIdAndRestaurantId(categoryId,restaurantId).orElseThrow(
                 () -> new BadRequestAlertException("Menu Category Not Found", ENTITY_NAME, "menuCategoryNotFound")
         );
         menuItem.setName(menuItem.getName() != null ? menuItem.getName().toUpperCase() : null);
@@ -96,9 +100,9 @@ public class MenuItemServiceImpl implements MenuItemService {
     }
 
     @Override
-    public Page<MenuItemDTO> getAllMenuItemsByCategoryId(Long restaurantId,Long categoryId, Boolean disabled,Boolean available,Boolean veg, String pattern, Pageable pageable) throws BadRequestException {
-        menuCategoryRepository.findByIdAndRestaurantId(restaurantId,categoryId).orElseThrow(
-                () -> new BadRequestException("category with id not present")
+    public Page<MenuItemDTO> getAllMenuItemsByCategoryId(Long restaurantId,Long categoryId, Boolean disabled,Boolean available,Boolean veg, String pattern, Pageable pageable) throws BadRequestAlertException {
+        menuCategoryRepository.findByIdAndRestaurantId(categoryId,restaurantId).orElseThrow(
+                () -> new BadRequestAlertException("category with id not present",ENTITY_NAME,"categoryIdNotFound")
         );
         if (pattern != null) pattern = pattern.toLowerCase();
         Page<MenuItem> menuItems = menuItemRepository.findAllByCategoryIdAndDisabledAndPattern(categoryId, disabled,available,veg, pattern, pageable);
@@ -106,7 +110,7 @@ public class MenuItemServiceImpl implements MenuItemService {
     }
 
     @Override
-    public void uploadImages(Long itemId, List<MultipartFile> multipartFiles) throws IOException, BadRequestAlertException {
+    public List<ImageDTO> uploadImages(Long itemId, List<MultipartFile> multipartFiles) throws IOException, BadRequestAlertException {
         MenuItem menuItem = menuItemRepository.findById(itemId).orElseThrow(
                 () -> new BadRequestAlertException("Menu Item Not Found", ENTITY_NAME, "menuItemNotFound")
         );
@@ -114,6 +118,7 @@ public class MenuItemServiceImpl implements MenuItemService {
         imageRepository.saveAll(images);
         menuItem.setImages(images);
         menuItemRepository.saveAndFlush(menuItem);
+        return images.stream().map(imageMapper::toDto).toList();
     }
 
     private Set<Image> convertToImage(List<MultipartFile> multipartFiles, MenuItem menuItem) throws IOException {

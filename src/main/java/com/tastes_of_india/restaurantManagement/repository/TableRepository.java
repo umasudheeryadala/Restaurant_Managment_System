@@ -21,7 +21,7 @@ public interface TableRepository extends JpaRepository<Tables,Long> {
 
     List<Tables> findAllByDeletedAndCapacity(boolean deleted,Integer capacity);
 
-    Optional<Tables> findByNameAndDeleted(String name,boolean deleted);
+    Optional<Tables> findByRestaurantIdAndNameAndDeleted(Long restaurantId,String name,boolean deleted);
 
     Page<Tables> findAllByRestaurantIdAndDeleted(Long id,boolean deleted, Pageable pageable);
 

@@ -8,6 +8,7 @@ import com.tastes_of_india.restaurantManagement.service.*;
 import com.tastes_of_india.restaurantManagement.service.dto.*;
 import com.tastes_of_india.restaurantManagement.service.util.PaginationUtil;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
+import com.tastes_of_india.restaurantManagement.web.rest.error.InvalidSessionException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
@@ -57,16 +58,44 @@ public class PublicResource {
     @Autowired
     private TableService tableService;
 
+    @Autowired
+    private RestaurantService restaurantService;
+
+
+    @GetMapping("restaurants/{restaurantId}")
+    public ResponseEntity<RestaurantDTO> getRestaurantDetails(@PathVariable Long restaurantId) throws BadRequestAlertException {
+        return ResponseEntity.ok(restaurantService.findByRestaurantById(restaurantId));
+    }
+
 
     //Generating Auth Token Which Acts As A Session Token
     @GetMapping("/restaurants/{restaurantId}/tables/{tableId}/welcome")
-    public ResponseEntity<String> getAuthenticationToken(@PathVariable Long restaurantId,@PathVariable Long tableId) throws BadRequestAlertException {
+    public ResponseEntity<String> getAuthenticationToken(@PathVariable Long restaurantId,@PathVariable Long tableId,@RequestParam(required = false) Boolean session, HttpServletRequest servletRequest) throws BadRequestAlertException {
+        LOG.debug("session {}",session);
+        try {
+            AuthTokenDTO authTokenDTO=validateService.isSessionActive(servletRequest);
+            if(authTokenDTO.getTableId().equals(tableId) && authTokenDTO.getRestaurantId().equals(restaurantId)) {
+                return ResponseEntity.ok().body("/public/restaurants/"+authTokenDTO.getRestaurantId()+"/tables/+"+authTokenDTO.getTableId()+"/welcome");
+            }else {
+                if(session==null) {
+                    throw new BadRequestAlertException("Invalid Session", ENTITY_NAME, "INVALID_SESSION");
+                }
+                if(!session){
+                    return ResponseEntity.ok("/public/restaurants/"+authTokenDTO.getRestaurantId()+"/tables/+"+authTokenDTO.getTableId()+"/welcome");
+                }
+            }
+        }catch (BadRequestAlertException badRequestAlertException){
+            throw badRequestAlertException;
+        }
+        catch (Exception e){
+            LOG.debug("Exception : {}",e.getMessage());
+        }
         AuthTokenDTO authTokenDTO = new AuthTokenDTO();
         authTokenDTO.setTableId(tableId);
         authTokenDTO.setRestaurantId(restaurantId);
         tableService.updateTableStatus(restaurantId,tableId, TableStatus.OCCUPIED);
         ResponseCookie responseCookie = validateService.generateJWTToken(authTokenDTO);
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, responseCookie.toString()).build();
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body("/public/restaurants/"+authTokenDTO.getRestaurantId()+"/tables/+"+authTokenDTO.getTableId()+"/welcome");
     }
 
     // Get All Menu Items Based On Category I'd
@@ -76,7 +105,7 @@ public class PublicResource {
                                                                        @RequestParam(required = false) String pattern,
                                                                        @RequestParam(required = false) Boolean veg,
                                                                        Pageable pageable,
-                                                                       HttpServletRequest servletRequest) throws BadRequestException, BadRequestAlertException {
+                                                                       HttpServletRequest servletRequest) throws BadRequestException, BadRequestAlertException, InvalidSessionException {
         AuthTokenDTO authTokenDTO=validateService.isSessionActive(servletRequest);
 
         Page<MenuItemDTO> menuItems = menuItemService.getAllMenuItemsByCategoryId(authTokenDTO.getRestaurantId(), categoryId, false, true, veg, pattern, pageable);
@@ -86,7 +115,7 @@ public class PublicResource {
     // Get All Menu Categories Based On RestaurantId
 
     @GetMapping("/menu_categories")
-    public ResponseEntity<List<MenuCategoryDTO>> getAllMenuCategories(Pageable pageable,HttpServletRequest servletRequest) throws BadRequestAlertException {
+    public ResponseEntity<List<MenuCategoryDTO>> getAllMenuCategories(Pageable pageable,HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
 
         AuthTokenDTO authTokenDTO=validateService.isSessionActive(servletRequest);
 
@@ -100,7 +129,7 @@ public class PublicResource {
     // Using Redis To Maintain Temporary Cart
 
     @PostMapping("/cart/addItems")
-    public ResponseEntity<List<CartItemDTO>> addItemToCart(@RequestBody List<CartItemDTO> cartItems, HttpServletRequest servletRequest) throws BadRequestAlertException {
+    public ResponseEntity<List<CartItemDTO>> addItemToCart(@RequestBody List<CartItemDTO> cartItems, HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
         for (CartItemDTO cartItem : cartItems) {
             if (cartItem.getId() == null) {
                 throw new BadRequestAlertException("Item id should not present", ENTITY_NAME, "itemItemNotPresent");
@@ -122,7 +151,7 @@ public class PublicResource {
     // Get All Cart Items
 
     @GetMapping("/cart")
-    public ResponseEntity<List<CartItemDTO>> getAllCartItems(HttpServletRequest servletRequest) throws BadRequestAlertException {
+    public ResponseEntity<List<CartItemDTO>> getAllCartItems(HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
         AuthTokenDTO authTokenDTO=validateService.isSessionActive(servletRequest);
 
         Long tableId = authTokenDTO.getTableId();
@@ -134,7 +163,7 @@ public class PublicResource {
 
     // Delete Cart Item
     @DeleteMapping("/cart/{cartItemId}")
-    public ResponseEntity<List<CartItemDTO>> deleteCartItem(@PathVariable Long cartItemId, HttpServletRequest servletRequest) throws BadRequestAlertException {
+    public ResponseEntity<List<CartItemDTO>> deleteCartItem(@PathVariable Long cartItemId, HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
         if (cartItemId == null) {
             throw new BadRequestAlertException("Item Id is empty", ENTITY_NAME, "idNull");
         }
@@ -150,7 +179,7 @@ public class PublicResource {
     // Proceed Cart Items Create New Order or Add Items To Order
 
     @PostMapping("/orders/proceed/{orderType}")
-    public ResponseEntity<OrderDTO> createOrder(@PathVariable OrderType orderType, HttpServletRequest servletRequest) throws BadRequestAlertException {
+    public ResponseEntity<OrderDTO> createOrder(@PathVariable OrderType orderType, HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
         AuthTokenDTO authToken = validateService.isSessionActive(servletRequest);
 
         Long tableId= authToken.getTableId();
@@ -171,21 +200,21 @@ public class PublicResource {
     // Cancel The ordered Item If the item placed with in 15 min and status is Ordered
 
     @PutMapping("/order_items/{itemId}/cancel")
-    public ResponseEntity<OrderItemDTO> cancelOrderItem(@PathVariable Long itemId,HttpServletRequest servletRequest) throws BadRequestAlertException {
+    public ResponseEntity<OrderItemDTO> cancelOrderItem(@PathVariable Long itemId,HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
         AuthTokenDTO authTokenDTO=validateService.isSessionActive(servletRequest);
 
         if(authTokenDTO.getOrderId()==null){
             throw new BadRequestAlertException("Order Details Not Found",ENTITY_NAME,"orderDetailsNotFound");
         }
 
-        OrderItemDTO orderItem=orderItemService.cancelOrderItem(authTokenDTO.getOrderId(),itemId);
+        OrderItemDTO orderItem=orderItemService.cancelOrderItem(itemId);
 
         return ResponseEntity.ok(orderItem);
     }
 
     // Get Order Details
     @GetMapping("/orders")
-    public ResponseEntity<OrderDTO> getOrderDetails(HttpServletRequest servletRequest) throws BadRequestAlertException {
+    public ResponseEntity<OrderDTO> getOrderDetails(HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
 
         AuthTokenDTO authTokenDTO=validateService.isSessionActive(servletRequest);
 
@@ -197,10 +226,23 @@ public class PublicResource {
 
     }
 
+    @GetMapping("/orders/{orderId}/order-items")
+    public ResponseEntity<List<OrderItemDTO>> getOrderItems(@PathVariable Long orderId,HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
+        AuthTokenDTO authTokenDTO=validateService.isSessionActive(servletRequest);
+
+        Long existingOrderId= authTokenDTO.getOrderId();
+
+        if(!existingOrderId.equals(orderId)){
+            throw new BadRequestAlertException("Order Not Found",ENTITY_NAME,"orderNotFound");
+        }
+
+        return ResponseEntity.ok(orderItemService.findAllOrderItemsByOrderId(orderId));
+    }
+
 
     // Cancel the order with in 15 min and none of the order started preparing
     @PutMapping("/orders/cancelOrder")
-    public ResponseEntity<String> cancelOrder(HttpServletRequest servletRequest) throws BadRequestAlertException {
+    public ResponseEntity<String> cancelOrder(HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
         AuthTokenDTO authTokenDTO=validateService.isSessionActive(servletRequest);
 
         if(authTokenDTO.getOrderId()==null){
@@ -215,12 +257,23 @@ public class PublicResource {
     }
 
     // Process the Order for Payment
-    @PostMapping("/payment")
-    public ResponseEntity<byte[]> createPayment(@RequestParam PaymentType paymentType, HttpServletRequest httpServletRequest) throws BadRequestAlertException, IOException {
+    @PostMapping("/payments/{paymentType}")
+    public ResponseEntity<PaymentDTO> createPayment(@PathVariable PaymentType paymentType, HttpServletRequest httpServletRequest) throws BadRequestAlertException, IOException, InvalidSessionException {
         AuthTokenDTO authTokenDTO=validateService.isSessionActive(httpServletRequest);
         if(authTokenDTO.getOrderId()!=null && authTokenDTO.getRestaurantId()!=null && authTokenDTO.getTableId()!=null){
             ResponseCookie responseCookie=validateService.inValidateSession(httpServletRequest);
-            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,responseCookie.toString()).contentType(MediaType.APPLICATION_PDF).body(paymentService.createPayment(authTokenDTO.getOrderId(),authTokenDTO.getTableId(), authTokenDTO.getRestaurantId(), paymentType));
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,responseCookie.toString()).body(paymentService.pay(authTokenDTO.getOrderId(),authTokenDTO.getTableId(), authTokenDTO.getRestaurantId(), paymentType));
+        }else{
+            throw new BadRequestAlertException("Payment Cannot be Processed",ENTITY_NAME,"paymentUnSuccessFull");
+        }
+    }
+
+    @GetMapping("/proceed/payment")
+    public ResponseEntity<Void> proceedForPayment(HttpServletRequest httpServletRequest) throws BadRequestAlertException, InvalidSessionException {
+        AuthTokenDTO authTokenDTO=validateService.isSessionActive(httpServletRequest);
+        if(authTokenDTO.getOrderId()!=null && authTokenDTO.getRestaurantId()!=null && authTokenDTO.getTableId()!=null){
+            paymentService.checkOut(authTokenDTO.getOrderId(),authTokenDTO.getTableId(), authTokenDTO.getRestaurantId());
+            return ResponseEntity.ok().build();
         }else{
             throw new BadRequestAlertException("Payment Cannot be Processed",ENTITY_NAME,"paymentUnSuccessFull");
         }
@@ -242,7 +295,7 @@ public class PublicResource {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void>  logoutSession(HttpServletRequest servletRequest) throws BadRequestAlertException {
+    public ResponseEntity<Void>  logoutSession(HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
         ResponseCookie responseCookie=validateService.inValidateSession(servletRequest);
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,responseCookie.toString()).build();
     }

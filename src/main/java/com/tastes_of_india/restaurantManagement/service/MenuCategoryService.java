@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface MenuCategoryService {
 
+    MenuCategoryDTO findById(Long categoryId) throws BadRequestAlertException;
+
     MenuCategoryDTO saveMenuCategory(Long restaurantId,MenuCategoryDTO menuCategoryDTO) throws  BadRequestAlertException;
 
     Page findAllMenuCategories(Pageable pageable,String pattern);

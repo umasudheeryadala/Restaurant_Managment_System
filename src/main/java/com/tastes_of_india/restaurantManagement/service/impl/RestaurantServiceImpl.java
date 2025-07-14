@@ -1,5 +1,7 @@
 package com.tastes_of_india.restaurantManagement.service.impl;
 
+import com.tastes_of_india.restaurantManagement.service.mapper.EmployeeMapper;
+import com.tastes_of_india.restaurantManagement.service.mapper.RestaurantEmployeeMapper;
 import com.tastes_of_india.restaurantManagement.service.util.FileUtil;
 import com.tastes_of_india.restaurantManagement.domain.Employee;
 import com.tastes_of_india.restaurantManagement.domain.Restaurant;
@@ -35,14 +37,20 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     private final RestaurantMapper restaurantMapper;
 
-    public RestaurantServiceImpl(RestaurantRepository restaurantRepository, EmployeeService employeeService, RestaurantMapper restaurantMapper) {
+    private final RestaurantEmployeeMapper restaurantEmployeeMapper;
+
+
+    public RestaurantServiceImpl(RestaurantRepository restaurantRepository, EmployeeService employeeService, RestaurantMapper restaurantMapper, RestaurantEmployeeMapper restaurantEmployeeMapper) {
         this.restaurantRepository = restaurantRepository;
         this.employeeService = employeeService;
         this.restaurantMapper = restaurantMapper;
+        this.restaurantEmployeeMapper = restaurantEmployeeMapper;
     }
 
     @Override
     public RestaurantDTO saveRestaurant(RestaurantDTO restaurantDTO) throws BadRequestAlertException, IOException {
+
+        Employee employee=employeeService.getCurrentlyLoggedInUser();
 
         if(restaurantDTO.getId()!=null){
             Restaurant restaurant=restaurantRepository.findById(restaurantDTO.getId()).orElseThrow(
@@ -53,7 +61,12 @@ public class RestaurantServiceImpl implements RestaurantService {
                 FileUtil.deleteFile(restaurant.getLogoUrl());
                 restaurant.setLogoUrl(FileUtil.saveFile(restaurantDTO.getImage(), restaurant.getId()));
             }
-            return restaurantMapper.toDto(restaurantRepository.save(restaurant));
+            restaurantRepository.save(restaurant);
+            RestaurantEmployeeDTO employeeDTO=new RestaurantEmployeeDTO();
+            employeeDTO.setEmployeeId(employee.getId());
+            employeeDTO.setDesignation(Designation.OWNER);
+            employeeService.saveRestaurantEmployee(restaurant.getId(),employeeDTO);
+            return restaurantMapper.toDto(restaurant);
         }
         if(restaurantDTO.getName()==null || restaurantDTO.getName().isEmpty()){
             throw new BadRequestAlertException("Restaurant Name Cannot be Empty",ENTITY_NAME,"nameCannotBeNull");
@@ -64,7 +77,6 @@ public class RestaurantServiceImpl implements RestaurantService {
             throw new BadRequestAlertException("Restaurant with Name Already Exists",ENTITY_NAME,"restaurantNameAlreadyExists");
         }
 
-        Employee employee=employeeService.getCurrentlyLoggedInUser();
         Restaurant newRestaurant=new Restaurant();
         newRestaurant.setName(restaurantDTO.getName());;
         newRestaurant.setAddress(restaurantDTO.getAddress());;

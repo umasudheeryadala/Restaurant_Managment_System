@@ -10,8 +10,10 @@ import org.mapstruct.Named;
 @Mapper(componentModel = "spring" , uses = {ImageMapper.class})
 public interface MenuItemMapper extends EntityMapper<MenuItemDTO, MenuItem>{
 
-    @Named("id")
+    @Named("idNamePrice")
     @Mapping(target = "id",source = "id")
+    @Mapping(target = "name",source = "name")
+    @Mapping(target = "price",source = "price")
     @BeanMapping(ignoreByDefault = true)
     MenuItemDTO toDtoId(MenuItem menuItem);
 

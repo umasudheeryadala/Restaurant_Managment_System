@@ -9,9 +9,10 @@ import com.tastes_of_india.restaurantManagement.repository.TableRepository;
 import com.tastes_of_india.restaurantManagement.service.EmployeeService;
 import com.tastes_of_india.restaurantManagement.service.TableService;
 import com.tastes_of_india.restaurantManagement.service.dto.TableBasicDTO;
+import com.tastes_of_india.restaurantManagement.service.dto.TableDTO;
+import com.tastes_of_india.restaurantManagement.service.mapper.TableBasicMapper;
 import com.tastes_of_india.restaurantManagement.service.mapper.TableMapper;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
-import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -33,18 +33,21 @@ public class TableServiceImpl implements TableService {
 
     private final TableRepository tableRepository;
 
-    private final TableMapper tableMapper;
+    private final TableBasicMapper tableBasicMapper;
 
     private final EmployeeService employeeService;
 
     private final RestaurantRepository restaurantRepository;
 
+    private final TableMapper tableMapper;
 
-    public TableServiceImpl(TableRepository tableRepository, TableMapper tableMapper, EmployeeService employeeService, RestaurantRepository restaurantRepository) {
+
+    public TableServiceImpl(TableRepository tableRepository, TableBasicMapper tableMapper, EmployeeService employeeService, RestaurantRepository restaurantRepository, TableMapper tableMapper1) {
         this.tableRepository = tableRepository;
-        this.tableMapper = tableMapper;
+        this.tableBasicMapper = tableMapper;
         this.employeeService = employeeService;
         this.restaurantRepository = restaurantRepository;
+        this.tableMapper = tableMapper1;
     }
 
     @Override
@@ -88,16 +91,16 @@ public class TableServiceImpl implements TableService {
                     () -> new BadRequestAlertException("Table with Id Not Found", ENTITY_NAME, "tableNotFound")
             );
             if (!table.getName().equals(tableBasicDTO.getName())) {
-                Optional<Tables> optionalTable = tableRepository.findByNameAndDeleted(tableBasicDTO.getName(), false);
+                Optional<Tables> optionalTable = tableRepository.findByRestaurantIdAndNameAndDeleted(restaurantId,tableBasicDTO.getName(), false);
                 if (optionalTable.isPresent()) {
                     throw new BadRequestAlertException("Table With Updated Name Already Exists", ENTITY_NAME, "tableAlreadyExists");
                 }
             }
-            tableMapper.partialUpdate(table, tableBasicDTO);
-            return tableMapper.toDto(tableRepository.saveAndFlush(table));
+            tableBasicMapper.partialUpdate(table, tableBasicDTO);
+            return tableBasicMapper.toDto(tableRepository.saveAndFlush(table));
 
         }
-        Optional<Tables> optionalTable = tableRepository.findByNameAndDeleted(tableBasicDTO.getName(), false);
+        Optional<Tables> optionalTable = tableRepository.findByRestaurantIdAndNameAndDeleted(restaurantId,tableBasicDTO.getName(), false);
 
         if (optionalTable.isPresent()) {
             throw new BadRequestAlertException("Table With Name Already Exists", ENTITY_NAME, "tableAlreadyExists");
@@ -106,12 +109,12 @@ public class TableServiceImpl implements TableService {
         Employee employee = employeeService.getCurrentlyLoggedInUser();
         Tables table = new Tables();
 
-        tableMapper.partialUpdate(table, tableBasicDTO);
+        tableBasicMapper.partialUpdate(table, tableBasicDTO);
         table.setRestaurant(restaurant);
         table.setCreatedBy(employee);
         table.setCreatedDate(ZonedDateTime.now());
         tableRepository.save(table);
-        return tableMapper.toDto(table);
+        return tableBasicMapper.toDto(table);
     }
 
     @Override
@@ -122,6 +125,15 @@ public class TableServiceImpl implements TableService {
         } else {
             tables = tableRepository.findAllByRestaurantIdAndDeletedAndStatus(restaurantId, false, tableStatus, pageable);
         }
-        return tables.map(tableMapper::toDto);
+        return tables.map(tableBasicMapper::toDto);
+    }
+
+    @Override
+    public TableDTO findTableById(Long tableId) throws BadRequestAlertException {
+        Tables table=tableRepository.findByIdAndDeleted(tableId,false).orElseThrow(
+                () -> new BadRequestAlertException("Table Not Found",ENTITY_NAME,"tableNotFound")
+        );
+
+        return tableMapper.toDto(table);
     }
 }

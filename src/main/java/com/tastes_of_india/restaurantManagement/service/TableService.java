@@ -2,6 +2,7 @@ package com.tastes_of_india.restaurantManagement.service;
 
 import com.tastes_of_india.restaurantManagement.domain.enumeration.TableStatus;
 import com.tastes_of_india.restaurantManagement.service.dto.TableBasicDTO;
+import com.tastes_of_india.restaurantManagement.service.dto.TableDTO;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
@@ -18,4 +19,6 @@ public interface TableService {
     TableBasicDTO saveTable(TableBasicDTO tableBasicDTO,Long restaurantId) throws BadRequestAlertException;
 
     Page<TableBasicDTO> getAllTables(Long restaurantId,TableStatus tableStatus, Pageable pageable);
+
+    TableDTO findTableById(Long tableId) throws BadRequestAlertException;
 }

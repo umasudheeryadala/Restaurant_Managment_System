@@ -5,10 +5,7 @@ import com.tastes_of_india.restaurantManagement.service.dto.OrderDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring" ,uses = {OrderItemMapper.class})
+@Mapper(componentModel = "spring" ,uses = {})
 public interface OrderMapper extends EntityMapper<OrderDTO, Order> {
-
-    @Mapping(target = "orderItems",source = "orderItems",qualifiedByName = "idSet")
-    OrderDTO toDto(Order order);
 
 }

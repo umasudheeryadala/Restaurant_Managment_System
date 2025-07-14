@@ -6,7 +6,7 @@ public class CartItemDTO {
 
     private String name;
 
-    private Integer Quantity;
+    private Integer quantity;
 
     private String instructions;
 
@@ -27,11 +27,11 @@ public class CartItemDTO {
     }
 
     public Integer getQuantity() {
-        return Quantity;
+        return quantity;
     }
 
     public void setQuantity(Integer quantity) {
-        Quantity = quantity;
+        this.quantity = quantity;
     }
 
     public String getInstructions() {

@@ -1,120 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"> </meta>
-    <title>Restaurant Receipt</title>
+    <meta charset="UTF-8" />
+    <title>Receipt</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 30px;
-            color: #333;
-            background-color: #f9f9f9;
+        @page {
+        size: 100mm 200mm; /* Width x Height in mm */
+        margin: 10mm;
+      }
+
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: #fff;
+      }
+
+        .receipt-container {
+          width: 280px;
+          margin: auto;
+          padding: 10px;
+          border: 1px solid #ccc;
         }
 
-         .watermark {
-              display: block;
-              margin: 20px auto 0;
-              width: 120px;
-              height: 120px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: #fff;
-            padding: 25px 40px;
-            box-shadow: 0 0 12px rgba(0,0,0,0.1);
-            border-radius: 10px;
+        .center {
+          text-align: center;
         }
 
         .header {
-            text-align: center;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
-            margin-bottom: 25px;
+          margin-bottom: 8px;
         }
 
-        .header h1 {
-            font-size: 30px;
-            margin: 0;
-            color: #2c3e50;
+        .header h2 {
+          margin: 2px 0;
+          font-size: 14px;
         }
 
         .header p {
-            margin: 4px 0;
-            font-size: 14px;
-            color: #555;
+          margin: 2px 0;
+          font-size: 10px;
         }
 
-        .details-table, .order-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            margin-bottom: 20px;
+        hr {
+          border: none;
+          border-top: 1px dashed #000;
+          margin: 6px 0;
         }
 
-        .details-table td {
-            padding: 8px;
+        .info-table, .item-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 6px;
+          font-size: 12px;
         }
 
-        .order-table th {
-            background-color: #2980b9;
-            color: white;
-            padding: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .info-table td {
+          padding: 2px 0;
         }
 
-        .order-table td {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            text-align: center;
+        .item-table thead th {
+          font-size: 10px;
+          text-align: left;
+          font-weight: bold;
+          border-bottom: 1px solid #000;
+          padding-bottom: 4px;
+        }
+
+        .item-table tbody tr{
+            font-size: 10px;
+            text-align: left;
+        }
+
+        .item-table tbody td{
+            font-size: 10px;
+            text-align: left;
+        }
+
+        .item-table td {
+          font-size: 10px;
+          padding: 2px 0;
         }
 
         .total {
-            text-align: right;
-            font-size: 16px;
-            font-weight: bold;
-            margin-top: 15px;
+          font-size: 14px;
+          text-align: right;
+          margin-top: 4px;
+          font-weight: bold;
         }
 
         .footer {
-            text-align: center;
-            font-size: 12px;
-            color: #888;
-            border-top: 1px dashed #ccc;
-            padding-top: 10px;
-            margin-top: 30px;
+          margin-top: 10px;
+          font-size: 11px;
+          text-align: center;
+          border-top: 1px dashed #000;
+          padding-top: 6px;
+        }
+
+        .watermark {
+          display: block;
+          margin: 0 auto 4px;
+          width: 80px;
+          height: auto;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <img class="watermark" src="data:image/jpeg;base64,${image}" alt="Logo Watermark" ></img>
-    <div class="header">
-        <h1>🍽️ ${restaurantName}</h1>
+<div class="receipt-container">
+    <img class="watermark" src="data:image/jpeg;base64,${image}" alt="Logo" />
+    <div class="header center">
+        <h2>${restaurantName}</h2>
         <p>${restaurantAddress}</p>
     </div>
 
-    <table class="details-table">
+    <hr />
+
+    <table class="info-table">
         <tr>
-            <td><strong>Order ID:</strong> ${orderId}</td>
             <td><strong>Date:</strong> ${orderDate}</td>
+            <td><strong>Dine In:</strong> ${tableName}</td>
         </tr>
         <tr>
-            <td><strong>InVoice No:</strong> ${inVoiceNo}</td>
-            <td><strong>Table Name:</strong> ${tableName}</td>
+            <td><strong>Bill No:</strong> ${inVoiceNo}</td>
+            <td><strong>Order ID:</strong> ${orderId}</td>
         </tr>
     </table>
 
-    <table class="order-table">
+    <hr />
+
+    <table class="item-table">
         <thead>
         <tr>
-            <th>Id</th>
+            <th>No.</th>
             <th>Item</th>
             <th>Qty</th>
-            <th>Price (₹)</th>
-            <th>Total (₹)</th>
+            <th>Amt</th>
         </tr>
         </thead>
         <tbody>
@@ -122,12 +142,14 @@
         </tbody>
     </table>
 
+    <hr />
+
     <div class="total">
-        Total: ₹${totalAmount}
+        Amount: ₹${totalAmount}
     </div>
 
     <div class="footer">
-        Thank you for dining with us! Please visit again. 🍽️
+        THANK YOU! PLEASE VISIT AGAIN
     </div>
 </div>
 </body>

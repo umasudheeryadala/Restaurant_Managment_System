@@ -47,6 +47,14 @@ spring:
             client-id: web-app
             client-secret: web-app
             scope: openid
+management:
+  endpoints:
+    web:
+      base-path: /management
+      exposure:
+        include: ['health','info']
+    health:
+      show-details: always
 
 logging:
   level:

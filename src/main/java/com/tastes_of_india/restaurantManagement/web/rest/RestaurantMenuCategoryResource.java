@@ -40,7 +40,7 @@ public class RestaurantMenuCategoryResource {
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
-    @AuthorizeApiAccess(designation = {Designation.KITCHEN_MANAGER,Designation.MANAGER})
+    @AuthorizeApiAccess(designation = {Designation.KITCHEN_MANAGER,Designation.MANAGER,Designation.OWNER})
     @PostMapping("/restaurants/{restaurantId}/menu_categories")
     public ResponseEntity<MenuCategoryDTO> saveMenuCategory(@PathVariable Long restaurantId,@RequestBody MenuCategoryDTO menuCategoryDTO) throws BadRequestAlertException {
         MenuCategoryDTO result=menuCategoryService.saveMenuCategory(restaurantId,menuCategoryDTO);

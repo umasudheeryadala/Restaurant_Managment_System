@@ -9,6 +9,7 @@ import com.tastes_of_india.restaurantManagement.service.TableService;
 import com.tastes_of_india.restaurantManagement.service.ValidateService;
 import com.tastes_of_india.restaurantManagement.service.dto.AuthTokenDTO;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
+import com.tastes_of_india.restaurantManagement.web.rest.error.InvalidSessionException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -54,10 +55,10 @@ public class ValidateServiceImpl implements ValidateService {
     }
 
     @Override
-    public AuthTokenDTO isSessionActive(HttpServletRequest servletRequest) throws BadRequestAlertException {
+    public AuthTokenDTO isSessionActive(HttpServletRequest servletRequest) throws  InvalidSessionException {
         Optional<String> tokenValue = getCookieByName(servletRequest, "auth_token");
         if (tokenValue.isEmpty()) {
-            throw new BadRequestAlertException("Session is Not Active",ENTITY_NAME,"sessionInActive");
+            throw new InvalidSessionException("Session is Not Active",ENTITY_NAME,"INVALID_SESSION");
         }
         String value = JWT
                 .require(Algorithm.HMAC512(applicationProperties.getClientSecret().getBytes()))
@@ -65,13 +66,13 @@ public class ValidateServiceImpl implements ValidateService {
                 .verify(tokenValue.get())
                 .getSubject();
         if (value == null) {
-            throw new BadRequestAlertException("Session is Not Active",ENTITY_NAME,"sessionInActive");
+            throw new InvalidSessionException("Session is Not Active",ENTITY_NAME,"INVALID_SESSION");
         }
         return gson.fromJson(value,AuthTokenDTO.class);
     }
 
     @Override
-    public ResponseCookie inValidateSession(HttpServletRequest servletRequest) throws BadRequestAlertException {
+    public ResponseCookie inValidateSession(HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
         AuthTokenDTO tokenDTO=isSessionActive(servletRequest);
         tableService.updateTableStatus(tokenDTO.getRestaurantId(), tokenDTO.getTableId(), TableStatus.AVAILABLE);
         return ResponseCookie.from("auth_token",null).maxAge(0).path("/").build();

@@ -19,7 +19,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant,Long> {
 
     Optional<Restaurant> findByDeletedAndTablesId(boolean deleted,Long tableId);
 
-    @Query(value = "select restaurant from Restaurant restaurant where restaurant.createdBy.Id= ?1 or restaurant.id in (select restaurantEmployee.restaurant.id from RestaurantEmployee restaurantEmployee left join Restaurant restaurant on restaurantEmployee.restaurant.id=restaurant.id where restaurantEmployee.employee.id=?1 and restaurantEmployee.designation=?2)")
+    @Query(value = "select restaurant from Restaurant restaurant where restaurant.createdBy.Id= ?1 and restaurant.deleted=false or restaurant.id in (select restaurantEmployee.restaurant.id from RestaurantEmployee restaurantEmployee left join Restaurant restaurant on restaurantEmployee.restaurant.id=restaurant.id where restaurantEmployee.employee.id=?1 and restaurantEmployee.designation=?2)")
     Page<Restaurant> findAllByCreatedByIdOrRestaurantEmployeeEmployeeIdIdAndDesignation(Long id, Designation designation, Pageable pageable);
 
 }

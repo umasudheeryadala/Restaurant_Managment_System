@@ -3,6 +3,7 @@ package com.tastes_of_india.restaurantManagement.web.rest;
 import com.tastes_of_india.restaurantManagement.annotation.AuthorizeApiAccess;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.Designation;
 import com.tastes_of_india.restaurantManagement.service.MenuItemService;
+import com.tastes_of_india.restaurantManagement.service.dto.ImageDTO;
 import com.tastes_of_india.restaurantManagement.service.dto.MenuItemDTO;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
 import org.apache.coyote.BadRequestException;
@@ -39,7 +40,7 @@ public class MenuItemResource {
                                                                        @RequestParam(required = false) String pattern,
                                                                        @RequestParam(required = false) Boolean available,
                                                                        @RequestParam(required = false) Boolean veg,
-                                                                       Pageable pageable) throws BadRequestException {
+                                                                       Pageable pageable) throws BadRequestException, BadRequestAlertException {
         Page<MenuItemDTO> menuItems=menuItemService.getAllMenuItemsByCategoryId(restaurantId,categoryId,disabled,available,veg,pattern,pageable);
         return ResponseEntity.ok(menuItems.getContent());
     }
@@ -69,8 +70,7 @@ public class MenuItemResource {
 
     @AuthorizeApiAccess(designation = {Designation.COOK,Designation.MANAGER,Designation.OWNER})
     @PostMapping(value = "/restaurants/{restaurantId}/menuItem/{itemId}/uploadImages")
-    public ResponseEntity<Void> uploadMenuItemImages(@PathVariable Long restaurantId,@PathVariable Long itemId,@RequestParam("file") List<MultipartFile> multipartFiles) throws BadRequestAlertException, IOException {
-        menuItemService.uploadImages(itemId,multipartFiles);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<ImageDTO>> uploadMenuItemImages(@PathVariable Long restaurantId, @PathVariable Long itemId, @RequestParam("file") List<MultipartFile> multipartFiles) throws BadRequestAlertException, IOException {
+        return ResponseEntity.ok(menuItemService.uploadImages(itemId,multipartFiles));
     }
 }

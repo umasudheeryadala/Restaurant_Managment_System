@@ -1,5 +1,6 @@
 package com.tastes_of_india.restaurantManagement.service;
 
+import com.tastes_of_india.restaurantManagement.service.dto.ImageDTO;
 import com.tastes_of_india.restaurantManagement.service.dto.MenuItemDTO;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
 import org.apache.coyote.BadRequestException;
@@ -14,7 +15,7 @@ public interface MenuItemService {
 
     MenuItemDTO saveMenuItem(Long restaurantId,MenuItemDTO menuItem, Long categoryId) throws IOException, BadRequestAlertException;
 
-    Page<MenuItemDTO> getAllMenuItemsByCategoryId(Long restaurantId,Long categoryId, Boolean disabled,Boolean available,Boolean veg, String pattern, Pageable pageable) throws BadRequestException;
+    Page<MenuItemDTO> getAllMenuItemsByCategoryId(Long restaurantId,Long categoryId, Boolean disabled,Boolean available,Boolean veg, String pattern, Pageable pageable) throws BadRequestException, BadRequestAlertException;
 
-    void  uploadImages(Long itemId,List<MultipartFile> multipartFiles) throws IOException, BadRequestAlertException;
+    List<ImageDTO>  uploadImages(Long itemId, List<MultipartFile> multipartFiles) throws IOException, BadRequestAlertException;
 }

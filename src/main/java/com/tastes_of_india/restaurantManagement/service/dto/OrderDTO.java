@@ -14,8 +14,6 @@ public class OrderDTO {
 
     private OrderType orderType;
 
-    private List<OrderItemDTO> orderItems;
-
     private ZonedDateTime createdType;
 
     public Long getId() {
@@ -50,13 +48,6 @@ public class OrderDTO {
         this.createdType = createdType;
     }
 
-    public List<OrderItemDTO> getOrderItems() {
-        return orderItems;
-    }
-
-    public void setOrderItems(List<OrderItemDTO> orderItems) {
-        this.orderItems = orderItems;
-    }
 
     @Override
     public String toString() {

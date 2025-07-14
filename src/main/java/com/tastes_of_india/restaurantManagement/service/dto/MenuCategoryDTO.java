@@ -1,6 +1,7 @@
 package com.tastes_of_india.restaurantManagement.service.dto;
 
 import com.tastes_of_india.restaurantManagement.domain.MenuItem;
+import com.tastes_of_india.restaurantManagement.domain.Restaurant;
 import jakarta.persistence.Column;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
@@ -19,7 +20,7 @@ public class MenuCategoryDTO {
 
     private String description;
 
-    private Set<MenuItemDTO> menuItems;
+    private RestaurantDTO restaurant;
 
     public Long getId() {
         return id;
@@ -53,12 +54,12 @@ public class MenuCategoryDTO {
         this.description = description;
     }
 
-    public Set<MenuItemDTO> getMenuItems() {
-        return menuItems;
+    public RestaurantDTO getRestaurant() {
+        return restaurant;
     }
 
-    public void setMenuItems(Set<MenuItemDTO> menuItems) {
-        this.menuItems = menuItems;
+    public void setRestaurant(RestaurantDTO restaurant) {
+        this.restaurant = restaurant;
     }
 
     @Override
@@ -68,7 +69,6 @@ public class MenuCategoryDTO {
                 ", name='" + name + '\'' +
                 ", disabled=" + disabled +
                 ", description='" + description + '\'' +
-                ", menuItems=" + menuItems +
                 '}';
     }
 }

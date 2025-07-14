@@ -22,14 +22,28 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler {
         return new ResponseEntity(mp,getMappedStatusCode(ex));
     }
 
+    @ExceptionHandler(value = InvalidSessionException.class)
+    public ResponseEntity<Object> handleInvalidSessionException(InvalidSessionException ex,NativeWebRequest request){
+        HashMap<String,String> mp=new HashMap<>();
+        mp.put("error_message",ex.getDefaultMessage());
+        mp.put("entity_name",ex.getEntityName());
+        mp.put("error_key",ex.getErrorKey());
+        return new ResponseEntity(mp,getMappedStatusCode(ex));
+    }
+
     @ExceptionHandler
     public ResponseEntity<Object> handleAnyException(Throwable ex,NativeWebRequest request){
-        return new ResponseEntity<>(ex,getMappedStatusCode(ex));
+        HashMap<String,String> mp=new HashMap<>();
+        mp.put("error_message",ex.getMessage());
+        mp.put("entity_name","Restaurant_Management");
+        mp.put("error_key","System Error");
+        return new ResponseEntity(mp,getMappedStatusCode(ex));
     }
 
     public HttpStatus getMappedStatusCode(Throwable ex){
         if(ex instanceof BadRequestAlertException) return HttpStatus.BAD_REQUEST;
         if(ex instanceof InsufficientAuthenticationException) return HttpStatus.UNAUTHORIZED;
+        if(ex instanceof InvalidSessionException) return HttpStatus.UNAUTHORIZED;
         return HttpStatus.INTERNAL_SERVER_ERROR;
     }
 }

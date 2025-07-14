@@ -39,7 +39,6 @@ public class RestaurantResource {
 
     }
 
-    @AuthorizeApiAccess(designation = Designation.All)
     @GetMapping("/restaurants/{restaurantId}")
     public ResponseEntity<RestaurantDTO> getRestaurant(@PathVariable Long restaurantId) throws BadRequestAlertException {
         return ResponseEntity.ok(restaurantService.findByRestaurantById(restaurantId));

@@ -27,7 +27,7 @@ public class Payment {
 
     @Column(name = "payment_method")
     @Enumerated(EnumType.STRING)
-    private PaymentType paymentTYpe;
+    private PaymentType paymentType;
 
     @Column(name = "payment_time")
     private ZonedDateTime paymentTime;
@@ -63,12 +63,12 @@ public class Payment {
         this.totalAmount = totalAmount;
     }
 
-    public PaymentType getPaymentTYpe() {
-        return paymentTYpe;
+    public PaymentType getPaymentType() {
+        return paymentType;
     }
 
-    public void setPaymentTYpe(PaymentType paymentTYpe) {
-        this.paymentTYpe = paymentTYpe;
+    public void setPaymentType(PaymentType paymentTYpe) {
+        this.paymentType = paymentTYpe;
     }
 
     public ZonedDateTime getPaymentTime() {
@@ -101,7 +101,7 @@ public class Payment {
                 "id=" + id +
                 ", billImage=" + billUrl +
                 ", totalAmount=" + totalAmount +
-                ", paymentTYpe=" + paymentTYpe +
+                ", paymentTYpe=" + paymentType +
                 ", paymentTime=" + paymentTime +
                 ", paymentStatus=" + paymentStatus +
                 ", order=" + order +

@@ -21,11 +21,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-public class OrderResource {
+public class RestaurantOrderResource {
 
-    private final Logger LOG= LoggerFactory.getLogger(OrderResource.class);
+    private final Logger LOG= LoggerFactory.getLogger(RestaurantOrderResource.class);
 
-    private final String ENTITY_NAME="orderResource";
+    private final String ENTITY_NAME="restaurantOrderResource";
 
     @Autowired
     private OrderService orderService;
@@ -38,6 +38,21 @@ public class OrderResource {
                                                                      @RequestParam(required = false) OrderType orderType,
                                                                      @RequestParam(required = false) OrderStatus orderStatus,
                                                                      Pageable pageable) throws BadRequestAlertException {
+        Page<OrderDTO> page=orderService.getAllOrdersByRestaurantId(restaurantId,tableId,startDateTime,endDateTime,orderType,orderStatus,pageable);
+
+        HttpHeaders headers= PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(),page);
+
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    @GetMapping("/restaurants/{restaurantId}/tables/{tableId}/orders")
+    public ResponseEntity<List<OrderDTO>> getAllOrdersByTableId(@PathVariable Long restaurantId,
+                                                                 @PathVariable Long tableId,
+                                                                 @RequestParam(required = false) ZonedDateTime startDateTime,
+                                                                 @RequestParam(required = false) ZonedDateTime endDateTime,
+                                                                 @RequestParam(required = false) OrderType orderType,
+                                                                 @RequestParam(required = false) OrderStatus orderStatus,
+                                                                 Pageable pageable) throws BadRequestAlertException {
         Page<OrderDTO> page=orderService.getAllOrdersByRestaurantId(restaurantId,tableId,startDateTime,endDateTime,orderType,orderStatus,pageable);
 
         HttpHeaders headers= PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(),page);

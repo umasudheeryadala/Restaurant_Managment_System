@@ -39,6 +39,14 @@ public class MenuCategoryServiceImpl implements MenuCategoryService {
     }
 
     @Override
+    public MenuCategoryDTO findById(Long categoryId) throws BadRequestAlertException {
+        MenuCategory menuCategory=menuCategoryRepository.findById(categoryId).orElseThrow(
+                () -> new BadRequestAlertException("Menu Category Not Found",ENTITY_NAME,"menuCategoryNotFound")
+        );
+        return menuCategoryMapper.toDto(menuCategory);
+    }
+
+    @Override
     public MenuCategoryDTO saveMenuCategory(Long restaurantId,MenuCategoryDTO menuCategoryDTO) throws BadRequestAlertException {
 
         Restaurant restaurant=restaurantRepository.findByIdAndDeleted(restaurantId,false).orElseThrow(

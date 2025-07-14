@@ -13,7 +13,7 @@ import java.util.Set;
 @Mapper(componentModel = "spring" ,uses = {MenuItemMapper.class})
 public interface OrderItemMapper extends EntityMapper<OrderItemDTO, OrderItem> {
 
-    @Mapping(target = "menuItem",source = "item",qualifiedByName = "id")
+    @Mapping(target = "menuItem",source = "item",qualifiedByName = "idNamePrice")
     OrderItemDTO toDto(OrderItem orderItem);
 
     @Named("idSet")

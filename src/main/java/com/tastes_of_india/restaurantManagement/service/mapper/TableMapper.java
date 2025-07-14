@@ -1,21 +1,14 @@
 package com.tastes_of_india.restaurantManagement.service.mapper;
 
-
 import com.tastes_of_india.restaurantManagement.domain.Tables;
-import com.tastes_of_india.restaurantManagement.service.dto.TableBasicDTO;
-import org.mapstruct.BeanMapping;
+import com.tastes_of_india.restaurantManagement.service.dto.TableDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
-@Mapper(componentModel = "spring" , uses = {OrderMapper.class, EmployeeMapper.class})
-public interface TableMapper extends EntityMapper<TableBasicDTO, Tables>{
 
-    TableBasicDTO toDto(Tables tables);
+@Mapper(componentModel = "spring" ,uses = {RestaurantMapper.class})
+public interface TableMapper extends EntityMapper<TableDTO, Tables> {
 
-    @Named("id")
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    TableBasicDTO toDtoId(Tables tables);
-
+    @Mapping(source = "restaurant" ,target = "restaurant", qualifiedByName = "id")
+    TableDTO toDto(Tables entity);
 }
