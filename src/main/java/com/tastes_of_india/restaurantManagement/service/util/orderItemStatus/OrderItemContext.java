@@ -1,4 +1,4 @@
-package com.tastes_of_india.restaurantManagement.service.util;
+package com.tastes_of_india.restaurantManagement.service.util.orderItemStatus;
 
 import com.tastes_of_india.restaurantManagement.domain.enumeration.OrderItemStatus;
 import com.tastes_of_india.restaurantManagement.service.util.orderItemStatus.OrderItemState;

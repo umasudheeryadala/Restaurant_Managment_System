@@ -115,7 +115,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private Payment processPayment(Order order,double amount,PaymentType paymentType) throws BadRequestAlertException {
-        PaymentProcessor paymentProcessor= PaymentFactory.instance.getPaymentProcessor(paymentType);
+        PaymentProcessor paymentProcessor= PaymentFactory.getInstance().getPaymentProcessor(paymentType);
         Payment payment=new Payment();
         payment.setTotalAmount(BigDecimal.valueOf(amount));
         payment.setOrder(order);
@@ -153,7 +153,6 @@ public class PaymentServiceImpl implements PaymentService {
                     .append("<td>").append("₹").append(menuItem.getPrice()).append("</td>")
                     .append("<td>").append("₹").append(item.getQuantity() * menuItem.getPrice()).append("</td>")
                     .append("</tr>");
-            totalAmount+=(item.getQuantity()*menuItem.getPrice());
         }
 
         String image= Base64.getEncoder().encodeToString(FileUtil.getFile(restaurant.getLogoUrl()));

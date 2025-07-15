@@ -1,4 +1,4 @@
-package com.tastes_of_india.restaurantManagement.service.util;
+package com.tastes_of_india.restaurantManagement.service.util.orderStatus;
 
 import com.tastes_of_india.restaurantManagement.domain.enumeration.OrderStatus;
 import com.tastes_of_india.restaurantManagement.service.util.orderStatus.OrderState;
@@ -30,7 +30,7 @@ public class OrderContext {
     }
 
     public void canPerformUpdate() throws BadRequestAlertException {
-        if(getOrderState()!=OrderStatus.ORDERED || getOrderState()!=OrderStatus.IN_PROGRESS){
+        if(getOrderState()==OrderStatus.CANCELLED || getOrderState()==OrderStatus.DELIVERED){
             throw new BadRequestAlertException("Update cannot possible","OrderUpdate","updateNotPossible");
         }
     }

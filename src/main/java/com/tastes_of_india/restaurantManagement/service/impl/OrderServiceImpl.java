@@ -4,6 +4,7 @@ import com.tastes_of_india.restaurantManagement.domain.Order;
 import com.tastes_of_india.restaurantManagement.domain.Tables;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.OrderStatus;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.OrderType;
+import com.tastes_of_india.restaurantManagement.repository.OrderItemRepository;
 import com.tastes_of_india.restaurantManagement.repository.OrderRepository;
 import com.tastes_of_india.restaurantManagement.repository.RestaurantRepository;
 import com.tastes_of_india.restaurantManagement.repository.TableRepository;
@@ -12,8 +13,8 @@ import com.tastes_of_india.restaurantManagement.service.OrderItemService;
 import com.tastes_of_india.restaurantManagement.service.OrderService;
 import com.tastes_of_india.restaurantManagement.service.dto.OrderDTO;
 import com.tastes_of_india.restaurantManagement.service.mapper.OrderMapper;
-import com.tastes_of_india.restaurantManagement.service.util.OrderContext;
-import com.tastes_of_india.restaurantManagement.service.util.OrderStatusFactory;
+import com.tastes_of_india.restaurantManagement.service.util.orderStatus.OrderContext;
+import com.tastes_of_india.restaurantManagement.service.util.orderStatus.OrderStatusFactory;
 import com.tastes_of_india.restaurantManagement.web.rest.StreamResource;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
 import jakarta.transaction.Transactional;
@@ -21,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
@@ -47,15 +47,18 @@ public class OrderServiceImpl implements OrderService {
 
     private final RestaurantRepository restaurantRepository;
 
+    private final OrderItemRepository orderItemRepository;
+
     private final StreamResource streamResource;
 
-    public OrderServiceImpl(OrderRepository orderRepository, TableRepository tableRepository, OrderMapper orderMapper, OrderItemService orderItemService, CartService cartService, RestaurantRepository restaurantRepository, StreamResource streamResource) {
+    public OrderServiceImpl(OrderRepository orderRepository, TableRepository tableRepository, OrderMapper orderMapper, OrderItemService orderItemService, CartService cartService, RestaurantRepository restaurantRepository, OrderItemRepository orderItemRepository, StreamResource streamResource) {
         this.orderRepository = orderRepository;
         this.tableRepository = tableRepository;
         this.orderMapper = orderMapper;
         this.orderItemService = orderItemService;
         this.cartService = cartService;
         this.restaurantRepository = restaurantRepository;
+        this.orderItemRepository = orderItemRepository;
         this.streamResource = streamResource;
     }
 
@@ -86,19 +89,19 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void cancelOrder(Long tableId,Long orderId) throws BadRequestAlertException {
-        Order order=orderRepository.findByIdAndTableIdAndStatus(orderId,tableId,OrderStatus.ORDERED).orElseThrow(
+        Order order=orderRepository.findByIdAndTableId(orderId,tableId).orElseThrow(
                 () -> new BadRequestAlertException("Order Cannot be Cancelled",ENTITY_NAME,"orderCannotBeCancelled")
         );
-        if(ZonedDateTime.now().isAfter(order.getCreatedDate().plusMinutes(10L))){
-            throw new BadRequestAlertException("Cancellation Time Exceeded",ENTITY_NAME,"timeExceeded ");
-        }
-        orderItemService.cancelOrderItems(order.getOrderItems());
-        order.setStatus(OrderStatus.CANCELLED);
+        OrderContext orderStatus=OrderStatusFactory.getInstance().getOrderState(order.getStatus());
+        orderStatus.cancel();
+        orderItemService.cancelOrderItems(orderItemRepository.findByOrderId(orderId));
+        order.setStatus(orderStatus.getOrderState());
         orderRepository.saveAndFlush(order);
     }
 
     @Override
     public void updateOrderStatus(Long orderId) throws BadRequestAlertException {
+        LOG.debug("updating order status: {}",orderId);
         Order order=orderRepository.findById(orderId).orElseThrow(
                 ()-> new BadRequestAlertException("Order Not Found",ENTITY_NAME,"orderNotFound")
         );
@@ -115,6 +118,8 @@ public class OrderServiceImpl implements OrderService {
         );
 
         OrderContext orderContext=OrderStatusFactory.getInstance().getOrderState(order.getStatus());
+
+        LOG.debug("canProcessedForPayment {}",orderContext.getOrderState());
 
         orderContext.processPayment();
     }

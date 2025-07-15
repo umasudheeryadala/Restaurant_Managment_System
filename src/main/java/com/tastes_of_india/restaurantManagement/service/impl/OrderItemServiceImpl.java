@@ -15,10 +15,10 @@ import com.tastes_of_india.restaurantManagement.service.OrderItemService;
 import com.tastes_of_india.restaurantManagement.service.dto.CartItemDTO;
 import com.tastes_of_india.restaurantManagement.service.dto.OrderItemDTO;
 import com.tastes_of_india.restaurantManagement.service.mapper.OrderItemMapper;
-import com.tastes_of_india.restaurantManagement.service.util.OrderContext;
-import com.tastes_of_india.restaurantManagement.service.util.OrderItemContext;
-import com.tastes_of_india.restaurantManagement.service.util.OrderItemStatusFactory;
-import com.tastes_of_india.restaurantManagement.service.util.OrderStatusFactory;
+import com.tastes_of_india.restaurantManagement.service.util.orderStatus.OrderContext;
+import com.tastes_of_india.restaurantManagement.service.util.orderItemStatus.OrderItemContext;
+import com.tastes_of_india.restaurantManagement.service.util.orderItemStatus.OrderItemStatusFactory;
+import com.tastes_of_india.restaurantManagement.service.util.orderStatus.OrderStatusFactory;
 import com.tastes_of_india.restaurantManagement.web.rest.StreamResource;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
 import jakarta.transaction.Transactional;
@@ -119,7 +119,8 @@ public class OrderItemServiceImpl implements OrderItemService {
         OrderItemStatusFactory statusFactory=OrderItemStatusFactory.getInstance();
         for(OrderItem orderItem:orderItems){
             OrderItemContext orderItemContext=statusFactory.getOrderState(orderItem.getStatus());
-            orderItemContext.cancel();
+            if (orderItemContext.getStateName()!=OrderItemStatus.CANCELLED)
+                orderItemContext.cancel();
         }
         orderItems.stream().forEach(orderItem -> orderItem.setStatus(OrderItemStatus.CANCELLED));
         orderItemRepository.saveAllAndFlush(orderItems);
@@ -186,14 +187,11 @@ public class OrderItemServiceImpl implements OrderItemService {
         }
     }
 
-    private void sendNotification(Long orderId,Long orderItemId,OrderItemStatus orderItemStatus){
-        if(orderItemStatus.equals(OrderItemStatus.PREPARING)){
-            streamResource.notifyOrderUpdate(orderId,"Item with Id: "+orderItemId+" started preparing");
-        } else if (orderItemStatus.equals(OrderItemStatus.CANCELLED)) {
-            streamResource.notifyOrderUpdate(orderId,"Item with Id: "+orderItemId+" cancelled");
-        }else if(orderItemStatus.equals(OrderItemStatus.DELIVERED)){
-            streamResource.notifyOrderUpdate(orderId,"Item with Id: "+orderItemId+" delivered successfully");
-        }
+    private void sendNotification(Long id,Long orderItemId,OrderItemStatus orderItemStatus){
+        String message = "Item with Id: " + orderItemId + " " + orderItemStatus.toString().toLowerCase();
+        LOG.debug(message);
+        streamResource.notifyOrderUpdate(id, message);
+
     }
 
     private void sendNotification(Long id, List<Long> orderItemIds){

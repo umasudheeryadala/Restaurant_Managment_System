@@ -1,23 +1,19 @@
-package com.tastes_of_india.restaurantManagement.service.util;
+package com.tastes_of_india.restaurantManagement.service.util.orderItemStatus;
 
 import com.tastes_of_india.restaurantManagement.domain.enumeration.OrderItemStatus;
-import com.tastes_of_india.restaurantManagement.service.util.orderItemStatus.CancelledState;
-import com.tastes_of_india.restaurantManagement.service.util.orderItemStatus.DeliveredState;
-import com.tastes_of_india.restaurantManagement.service.util.orderItemStatus.OrderPlacedState;
-import com.tastes_of_india.restaurantManagement.service.util.orderItemStatus.PreparingState;
 
 public class OrderItemStatusFactory {
 
-    private static final OrderItemStatusFactory instance=new OrderItemStatusFactory();
     OrderItemContext orderItemContext;
 
-    private OrderItemStatusFactory(){
+    public OrderItemStatusFactory(){
         this.orderItemContext=new OrderItemContext();
     }
 
     public static OrderItemStatusFactory getInstance(){
-        return instance;
+        return new OrderItemStatusFactory();
     }
+
 
     public OrderItemContext getOrderState(OrderItemStatus orderItemStatus){
         switch (orderItemStatus){

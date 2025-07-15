@@ -5,12 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b4a5656f-e373-4b46-a07b-c04b9f9c78e9" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/impl/OrderItemServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/impl/OrderItemServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/impl/OrderServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/impl/OrderServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/impl/PaymentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/impl/PaymentServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/payment/PaymentFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/payment/PaymentFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/OrderContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderStatus/OrderContext.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/OrderItemContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderItemStatus/OrderItemContext.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/OrderItemStatusFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderItemStatus/OrderItemStatusFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/OrderStatusFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderStatus/OrderStatusFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderItemStatus/CancelledState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderItemStatus/CancelledState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderItemStatus/DeliveredState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderItemStatus/DeliveredState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderItemStatus/OrderItemState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderItemStatus/OrderItemState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderItemStatus/OrderPlacedState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderItemStatus/OrderPlacedState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderItemStatus/PreparingState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderItemStatus/PreparingState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderStatus/OrderCancelledState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderStatus/OrderCancelledState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderStatus/OrderDeliveredState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderStatus/OrderDeliveredState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderStatus/OrderPlacedState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderStatus/OrderPlacedState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderStatus/OrderState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderStatus/OrderState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderStatus/Order_IN_ProgressState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/service/util/orderStatus/Order_IN_ProgressState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/web/rest/PublicResource.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/tastes_of_india/restaurantManagement/web/rest/PublicResource.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,8 +36,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Enum" />
-        <option value="Interface" />
         <option value="AnnotationType" />
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -50,24 +65,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.RestaurantManagementApplication.executor": "Run",
-    "Maven.restaurantManagement [clean,install,-o].executor": "Run",
-    "Maven.restaurantManagement [clean,install].executor": "Run",
-    "Maven.restaurantManagement [install].executor": "Run",
-    "Maven.restaurantManagement [spring-boot:run].executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/sudheer yadala/Desktop/New folder",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "MavenSettings"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.RestaurantManagementApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.restaurantManagement [clean,install,-o].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.restaurantManagement [clean,install].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.restaurantManagement [install].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.restaurantManagement [spring-boot:run].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/sudheer yadala/Desktop/New folder&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\sudheer yadala\Desktop\resturantManagement\src\main\resources\static\images" />
@@ -76,6 +92,7 @@
       <recent name="C:\Users\sudheer yadala\Desktop\resturantManagement\src\main\resources/config/liquibase" />
     </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="com.tastes_of_india.restaurantManagement.service" />
       <recent name="com.tastes_of_india.restaurantManagement.service.mapper" />
     </key>
   </component>

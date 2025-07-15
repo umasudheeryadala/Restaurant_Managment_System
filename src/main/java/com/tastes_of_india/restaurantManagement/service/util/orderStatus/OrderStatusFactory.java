@@ -1,18 +1,9 @@
-package com.tastes_of_india.restaurantManagement.service.util;
+package com.tastes_of_india.restaurantManagement.service.util.orderStatus;
 
-import com.tastes_of_india.restaurantManagement.domain.enumeration.OrderItemStatus;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.OrderStatus;
-import com.tastes_of_india.restaurantManagement.service.util.orderItemStatus.CancelledState;
-import com.tastes_of_india.restaurantManagement.service.util.orderItemStatus.DeliveredState;
-import com.tastes_of_india.restaurantManagement.service.util.orderItemStatus.PreparingState;
-import com.tastes_of_india.restaurantManagement.service.util.orderStatus.OrderCancelledState;
-import com.tastes_of_india.restaurantManagement.service.util.orderStatus.OrderDeliveredState;
-import com.tastes_of_india.restaurantManagement.service.util.orderStatus.OrderPlacedState;
-import com.tastes_of_india.restaurantManagement.service.util.orderStatus.Order_IN_ProgressState;
 
 public class OrderStatusFactory {
 
-    private static final OrderStatusFactory instance=new OrderStatusFactory();
     OrderContext orderContext;
 
     private OrderStatusFactory(){
@@ -20,7 +11,7 @@ public class OrderStatusFactory {
     }
 
     public static OrderStatusFactory getInstance(){
-        return instance;
+        return new OrderStatusFactory();
     }
 
     public OrderContext getOrderState(OrderStatus orderItemStatus){

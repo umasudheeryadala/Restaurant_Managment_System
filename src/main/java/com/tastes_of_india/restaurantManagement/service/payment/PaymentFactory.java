@@ -4,12 +4,14 @@ import com.tastes_of_india.restaurantManagement.domain.enumeration.PaymentType;
 
 public class PaymentFactory {
 
-    public  static final PaymentFactory instance=new PaymentFactory();
-
     private PaymentProcessor paymentProcessor;
 
     private PaymentFactory(){
         paymentProcessor=new PaymentProcessor(new CashPaymentStrategy());
+    }
+
+    public static PaymentFactory getInstance(){
+        return new PaymentFactory();
     }
 
     public PaymentProcessor getPaymentProcessor(PaymentType paymentType){

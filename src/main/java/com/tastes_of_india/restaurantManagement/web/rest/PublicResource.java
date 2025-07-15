@@ -75,13 +75,13 @@ public class PublicResource {
         try {
             AuthTokenDTO authTokenDTO=validateService.isSessionActive(servletRequest);
             if(authTokenDTO.getTableId().equals(tableId) && authTokenDTO.getRestaurantId().equals(restaurantId)) {
-                return ResponseEntity.ok().body("/public/restaurants/"+authTokenDTO.getRestaurantId()+"/tables/+"+authTokenDTO.getTableId()+"/welcome");
+                return ResponseEntity.ok().body("/public/restaurants/"+authTokenDTO.getRestaurantId()+"/tables/"+authTokenDTO.getTableId()+"/welcome");
             }else {
                 if(session==null) {
                     throw new BadRequestAlertException("Invalid Session", ENTITY_NAME, "INVALID_SESSION");
                 }
                 if(!session){
-                    return ResponseEntity.ok("/public/restaurants/"+authTokenDTO.getRestaurantId()+"/tables/+"+authTokenDTO.getTableId()+"/welcome");
+                    return ResponseEntity.ok("/public/restaurants/"+authTokenDTO.getRestaurantId()+"/tables/"+authTokenDTO.getTableId()+"/welcome");
                 }
             }
         }catch (BadRequestAlertException badRequestAlertException){
@@ -241,7 +241,7 @@ public class PublicResource {
 
 
     // Cancel the order with in 15 min and none of the order started preparing
-    @PutMapping("/orders/cancelOrder")
+    @DeleteMapping("/orders/cancelOrder")
     public ResponseEntity<String> cancelOrder(HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
         AuthTokenDTO authTokenDTO=validateService.isSessionActive(servletRequest);
 
@@ -299,5 +299,7 @@ public class PublicResource {
         ResponseCookie responseCookie=validateService.inValidateSession(servletRequest);
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,responseCookie.toString()).build();
     }
+
+
 
 }
