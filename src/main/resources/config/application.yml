@@ -23,7 +23,7 @@ spring:
     properties:
       hibernate.jdbc.time_zone: UTC
       hibernate.id.new_generator_mapping: true
-      hibernate.connection.provider.disables_autocommit: true
+      hibernate.connection.provider_disables_autocommit: false
       hibernate.generate_statistics: false
       hibernate.jdbc.batch_size: 250
       hibernate.order_inserts: true
@@ -59,11 +59,9 @@ management:
 logging:
   level:
     ROOT: DEBUG
-    org.hibernate.SQL: DEBUG
+    org.hibernate: INFO
     com.tastes_of_india.restaurantManagement: DEBUG
     liquibase: DEBUG
-    org.apache.tomcat: INFO
-    org.apache.coyote: INFO
 
 application:
   keycloak_access_token_url: http://localhost:8080/realms/RestaurantMangment/protocol/openid-connect/token
@@ -74,3 +72,13 @@ application:
   keycloak_client_secret: web-app
   grant_type: password
   clientSecret: ZgXMYwvHBblsT+KCSzeFmVHQkrNFW/BigAg5jcEb0KzEVc5WYikxONfj14HT9S9h
+
+app:
+  storage: minio
+
+minio:
+  url: http://localhost:9000
+  access-key: admin
+  secret-key: admin123
+  bucket: restaurant
+

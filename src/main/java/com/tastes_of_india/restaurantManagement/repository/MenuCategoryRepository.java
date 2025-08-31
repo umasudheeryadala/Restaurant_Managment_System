@@ -1,5 +1,6 @@
 package com.tastes_of_india.restaurantManagement.repository;
 
+import com.tastes_of_india.restaurantManagement.annotation.redis.CacheableWithTTL;
 import com.tastes_of_india.restaurantManagement.domain.MenuCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

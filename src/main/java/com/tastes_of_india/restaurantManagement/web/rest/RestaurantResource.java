@@ -6,6 +6,7 @@ import com.tastes_of_india.restaurantManagement.service.RestaurantService;
 import com.tastes_of_india.restaurantManagement.service.dto.RestaurantDTO;
 import com.tastes_of_india.restaurantManagement.service.util.PaginationUtil;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
+import io.minio.errors.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Objects;
 
@@ -45,14 +48,14 @@ public class RestaurantResource {
     }
 
     @PostMapping("/restaurants")
-    public ResponseEntity<RestaurantDTO> saveRestaurant(@ModelAttribute RestaurantDTO restaurant) throws BadRequestAlertException, IOException {
+    public ResponseEntity<RestaurantDTO> saveRestaurant(@ModelAttribute RestaurantDTO restaurant) throws BadRequestAlertException, IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         RestaurantDTO result=restaurantService.saveRestaurant(restaurant);
         return ResponseEntity.ok(result);
     }
 
     @AuthorizeApiAccess(designation = {Designation.MANAGER,Designation.OWNER})
     @PutMapping("/restaurants/{restaurantId}")
-    public ResponseEntity<RestaurantDTO> updateRestaurant(@ModelAttribute RestaurantDTO restaurant,@PathVariable Long restaurantId) throws BadRequestAlertException, IOException {
+    public ResponseEntity<RestaurantDTO> updateRestaurant(@ModelAttribute RestaurantDTO restaurant,@PathVariable Long restaurantId) throws BadRequestAlertException, IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         if(restaurant.getId()==null){
             throw new BadRequestAlertException("Id Not Found",ENTITY_NAME,"idNotFound");
         }

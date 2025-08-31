@@ -16,7 +16,7 @@ public class RedisConfig {
         template.setConnectionFactory(connectionFactory);
         // Use Jackson JSON serializer for DTOs
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
         return template;
     }
 }

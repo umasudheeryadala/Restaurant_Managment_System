@@ -1,5 +1,6 @@
 package com.tastes_of_india.restaurantManagement.web.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tastes_of_india.restaurantManagement.service.CartService;
 import com.tastes_of_india.restaurantManagement.service.dto.CartItemDTO;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
@@ -23,7 +24,7 @@ public class CartResource {
     private CartService cartService;
 
     @PostMapping("/restaurant/{restaurantId}/table/{tableId}/cart/add_item")
-    public ResponseEntity<String> addItemToCart(@PathVariable Long restaurantId,@PathVariable Long tableId, @RequestBody List<CartItemDTO> cartItems) throws BadRequestAlertException {
+    public ResponseEntity<String> addItemToCart(@PathVariable Long restaurantId,@PathVariable Long tableId, @RequestBody List<CartItemDTO> cartItems) throws BadRequestAlertException, JsonProcessingException {
         for (CartItemDTO cartItem:cartItems) {
             if (cartItem.getId() == null) {
                 throw new BadRequestAlertException("Item id should not present", ENTITY_NAME, "itemItemNotPresent");
@@ -35,12 +36,12 @@ public class CartResource {
     }
 
     @GetMapping("/restaurants/{restaurantId}/table/{tableId}/cart")
-    public ResponseEntity<List<CartItemDTO>> getAllCartItems(@PathVariable Long restaurantId,@PathVariable Long tableId) throws BadRequestAlertException {
+    public ResponseEntity<List<CartItemDTO>> getAllCartItems(@PathVariable Long restaurantId,@PathVariable Long tableId) throws BadRequestAlertException, JsonProcessingException {
         return ResponseEntity.ok(cartService.findAllCartItems(restaurantId,tableId));
     }
 
     @DeleteMapping("/restaurants/{restaurantId}/table/{tableId}/cart/{cartItemId}")
-    public ResponseEntity<List<CartItemDTO>> deleteCartItem(@PathVariable Long restaurantId,@PathVariable Long tableId,@PathVariable Long cartItemId) throws BadRequestAlertException {
+    public ResponseEntity<List<CartItemDTO>> deleteCartItem(@PathVariable Long restaurantId,@PathVariable Long tableId,@PathVariable Long cartItemId) throws BadRequestAlertException, JsonProcessingException {
         if(cartItemId==null){
             throw new BadRequestAlertException("Item Id is empty",ENTITY_NAME,"idNull");
         }

@@ -1,7 +1,8 @@
 package com.tastes_of_india.restaurantManagement.service.impl;
 
+import com.tastes_of_india.restaurantManagement.service.FileService;
 import com.tastes_of_india.restaurantManagement.service.mapper.ImageMapper;
-import com.tastes_of_india.restaurantManagement.service.util.FileUtil;
+import com.tastes_of_india.restaurantManagement.service.util.storage.LocalStorage;
 import com.tastes_of_india.restaurantManagement.domain.Image;
 import com.tastes_of_india.restaurantManagement.domain.MenuCategory;
 import com.tastes_of_india.restaurantManagement.domain.MenuItem;
@@ -13,8 +14,8 @@ import com.tastes_of_india.restaurantManagement.service.dto.ImageDTO;
 import com.tastes_of_india.restaurantManagement.service.dto.MenuItemDTO;
 import com.tastes_of_india.restaurantManagement.service.mapper.MenuItemMapper;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
+import io.minio.errors.*;
 import jakarta.transaction.Transactional;
-import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,16 +47,19 @@ public class MenuItemServiceImpl implements MenuItemService {
 
     private final ImageMapper imageMapper;
 
-    public MenuItemServiceImpl(MenuItemRepository menuItemRepository, MenuItemMapper menuItemMapper, MenuCategoryRepository menuCategoryRepository, ImageRepository imageRepository, ImageMapper imageMapper) {
+    private final FileService fileService;
+
+    public MenuItemServiceImpl(MenuItemRepository menuItemRepository, MenuItemMapper menuItemMapper, MenuCategoryRepository menuCategoryRepository, ImageRepository imageRepository, ImageMapper imageMapper, FileService fileService) {
         this.menuItemRepository = menuItemRepository;
         this.menuItemMapper = menuItemMapper;
         this.menuCategoryRepository = menuCategoryRepository;
         this.imageRepository = imageRepository;
         this.imageMapper = imageMapper;
+        this.fileService = fileService;
     }
 
     @Override
-    public MenuItemDTO saveMenuItem(Long restaurantId,MenuItemDTO menuItem, Long categoryId) throws IOException, BadRequestAlertException {
+    public MenuItemDTO saveMenuItem(Long restaurantId,MenuItemDTO menuItem, Long categoryId) throws IOException, BadRequestAlertException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
         MenuCategory menuCategory = menuCategoryRepository.findByIdAndRestaurantId(categoryId,restaurantId).orElseThrow(
                 () -> new BadRequestAlertException("Menu Category Not Found", ENTITY_NAME, "menuCategoryNotFound")
@@ -74,7 +80,7 @@ public class MenuItemServiceImpl implements MenuItemService {
                 }
             }
             imageRepository.deleteAll(images);
-            FileUtil.deleteFiles(imagesToDelete);
+            fileService.deleteFiles(imagesToDelete);
             if (menuItem.getName() != null && !menuItem1.getName().equals(menuItem.getName())) {
                 Optional<MenuItem> optionalMenuItem = menuItemRepository.findByNameAndCategoryId(menuItem.getName(), categoryId);
                 if (optionalMenuItem.isPresent()) {
@@ -110,7 +116,7 @@ public class MenuItemServiceImpl implements MenuItemService {
     }
 
     @Override
-    public List<ImageDTO> uploadImages(Long itemId, List<MultipartFile> multipartFiles) throws IOException, BadRequestAlertException {
+    public List<ImageDTO> uploadImages(Long itemId, List<MultipartFile> multipartFiles) throws IOException, BadRequestAlertException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         MenuItem menuItem = menuItemRepository.findById(itemId).orElseThrow(
                 () -> new BadRequestAlertException("Menu Item Not Found", ENTITY_NAME, "menuItemNotFound")
         );
@@ -121,8 +127,8 @@ public class MenuItemServiceImpl implements MenuItemService {
         return images.stream().map(imageMapper::toDto).toList();
     }
 
-    private Set<Image> convertToImage(List<MultipartFile> multipartFiles, MenuItem menuItem) throws IOException {
-        List<String> imageUrls = FileUtil.saveFiles(multipartFiles, menuItem.getId());
+    private Set<Image> convertToImage(List<MultipartFile> multipartFiles, MenuItem menuItem) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        List<String> imageUrls = fileService.saveFiles(multipartFiles, menuItem.getId());
         Set<Image> images = new HashSet<>();
         for (String imageUrl : imageUrls) {
             Image image = new Image();

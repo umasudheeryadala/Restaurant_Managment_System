@@ -1,6 +1,8 @@
 package com.tastes_of_india.restaurantManagement.web.rest;
 
-import com.tastes_of_india.restaurantManagement.service.util.FileUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.tastes_of_india.restaurantManagement.service.impl.FileServiceImpl;
+import com.tastes_of_india.restaurantManagement.service.util.storage.LocalStorage;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.OrderType;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.PaymentType;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.TableStatus;
@@ -9,6 +11,7 @@ import com.tastes_of_india.restaurantManagement.service.dto.*;
 import com.tastes_of_india.restaurantManagement.service.util.PaginationUtil;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
 import com.tastes_of_india.restaurantManagement.web.rest.error.InvalidSessionException;
+import io.minio.errors.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
@@ -24,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @RestController
@@ -60,6 +65,9 @@ public class PublicResource {
 
     @Autowired
     private RestaurantService restaurantService;
+
+    @Autowired
+    private FileService fileService;
 
 
     @GetMapping("restaurants/{restaurantId}")
@@ -129,7 +137,7 @@ public class PublicResource {
     // Using Redis To Maintain Temporary Cart
 
     @PostMapping("/cart/addItems")
-    public ResponseEntity<List<CartItemDTO>> addItemToCart(@RequestBody List<CartItemDTO> cartItems, HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
+    public ResponseEntity<List<CartItemDTO>> addItemToCart(@RequestBody List<CartItemDTO> cartItems, HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException, JsonProcessingException {
         for (CartItemDTO cartItem : cartItems) {
             if (cartItem.getId() == null) {
                 throw new BadRequestAlertException("Item id should not present", ENTITY_NAME, "itemItemNotPresent");
@@ -151,7 +159,7 @@ public class PublicResource {
     // Get All Cart Items
 
     @GetMapping("/cart")
-    public ResponseEntity<List<CartItemDTO>> getAllCartItems(HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
+    public ResponseEntity<List<CartItemDTO>> getAllCartItems(HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException, JsonProcessingException {
         AuthTokenDTO authTokenDTO=validateService.isSessionActive(servletRequest);
 
         Long tableId = authTokenDTO.getTableId();
@@ -163,7 +171,7 @@ public class PublicResource {
 
     // Delete Cart Item
     @DeleteMapping("/cart/{cartItemId}")
-    public ResponseEntity<List<CartItemDTO>> deleteCartItem(@PathVariable Long cartItemId, HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException {
+    public ResponseEntity<List<CartItemDTO>> deleteCartItem(@PathVariable Long cartItemId, HttpServletRequest servletRequest) throws BadRequestAlertException, InvalidSessionException, JsonProcessingException {
         if (cartItemId == null) {
             throw new BadRequestAlertException("Item Id is empty", ENTITY_NAME, "idNull");
         }
@@ -258,7 +266,7 @@ public class PublicResource {
 
     // Process the Order for Payment
     @PostMapping("/payments/{paymentType}")
-    public ResponseEntity<PaymentDTO> createPayment(@PathVariable PaymentType paymentType, HttpServletRequest httpServletRequest) throws BadRequestAlertException, IOException, InvalidSessionException {
+    public ResponseEntity<PaymentDTO> createPayment(@PathVariable PaymentType paymentType, HttpServletRequest httpServletRequest) throws BadRequestAlertException, IOException, InvalidSessionException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         AuthTokenDTO authTokenDTO=validateService.isSessionActive(httpServletRequest);
         if(authTokenDTO.getOrderId()!=null && authTokenDTO.getRestaurantId()!=null && authTokenDTO.getTableId()!=null){
             ResponseCookie responseCookie=validateService.inValidateSession(httpServletRequest);
@@ -281,7 +289,7 @@ public class PublicResource {
 
     // Based On the paymentId get the payment receipt
     @GetMapping("/payments/{paymentId}/receipt")
-    public ResponseEntity<byte[]> getPaymentReceipt(@PathVariable Long paymentId) throws BadRequestAlertException, IOException {
+    public ResponseEntity<byte[]> getPaymentReceipt(@PathVariable Long paymentId) throws BadRequestAlertException, IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         byte[] result=paymentService.getPaymentReceipt(paymentId);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(result);
     }
@@ -289,8 +297,8 @@ public class PublicResource {
 
     // To fetch menu Item Images
     @GetMapping("/images/{fileName}")
-    public ResponseEntity<byte[]> getImage(@PathVariable String fileName) throws BadRequestAlertException, IOException {
-        byte[] result= FileUtil.getFile(fileName);
+    public ResponseEntity<byte[]> getImage(@PathVariable String fileName) throws BadRequestAlertException, IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        byte[] result= fileService.getFile(fileName);
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(result);
     }
 

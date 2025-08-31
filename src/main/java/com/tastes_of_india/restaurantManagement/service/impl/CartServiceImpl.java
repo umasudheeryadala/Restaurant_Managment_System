@@ -1,8 +1,10 @@
 package com.tastes_of_india.restaurantManagement.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tastes_of_india.restaurantManagement.config.Constants;
 import com.tastes_of_india.restaurantManagement.domain.MenuItem;
 import com.tastes_of_india.restaurantManagement.domain.Tables;
+import com.tastes_of_india.restaurantManagement.repository.CartRepository;
 import com.tastes_of_india.restaurantManagement.repository.GenericRedisRepository;
 import com.tastes_of_india.restaurantManagement.repository.MenuItemRepository;
 import com.tastes_of_india.restaurantManagement.repository.TableRepository;
@@ -29,15 +31,15 @@ public class CartServiceImpl implements CartService {
 
     private final TableRepository tableRepository;
 
-    private final GenericRedisRepository genericRedisRepository;
+    private final CartRepository cartRepository;
 
-    public CartServiceImpl( TableRepository tableRepository, GenericRedisRepository genericRedisRepository) {
+    public CartServiceImpl(TableRepository tableRepository, CartRepository cartRepository) {
         this.tableRepository = tableRepository;
-        this.genericRedisRepository = genericRedisRepository;
+        this.cartRepository = cartRepository;
     }
 
     @Override
-    public List<CartItemDTO> addItemsToCart(Long restaurantId,Long tableId, List<CartItemDTO> cartItemDTOs) throws BadRequestAlertException {
+    public List<CartItemDTO> addItemsToCart(Long restaurantId,Long tableId, List<CartItemDTO> cartItemDTOs) throws BadRequestAlertException, JsonProcessingException {
         LOG.debug("Adding Items To Cart: {}",cartItemDTOs);
         Optional<Tables> optionalTable = tableRepository.findByIdAndRestaurantIdAndDeleted(tableId,restaurantId,false);
         if (optionalTable.isEmpty()) {
@@ -45,7 +47,7 @@ public class CartServiceImpl implements CartService {
         }
 
         String cartKey=Constants.CART_KEY+Constants.REDIS_SEPARATOR+restaurantId+Constants.REDIS_SEPARATOR+tableId;
-        List<CartItemDTO> cartItems = (List<CartItemDTO>) genericRedisRepository.get(cartKey);
+        List<CartItemDTO> cartItems = cartRepository.getCartItems(cartKey);
 
         if (cartItems == null) cartItems = new ArrayList<>();
         for (CartItemDTO cartItemDTO : cartItemDTOs) {
@@ -62,7 +64,7 @@ public class CartServiceImpl implements CartService {
             }
         }
         try {
-            genericRedisRepository.save(cartKey, cartItems, 60L, TimeUnit.MINUTES);
+            cartRepository.saveCartItems(cartKey, cartItems, 60L, TimeUnit.MINUTES);
         } catch (Exception e) {
             throw new BadRequestAlertException("Error while adding item into cart", ENTITY_NAME, "error");
         }
@@ -70,18 +72,18 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public List<CartItemDTO> findAllCartItems(Long restaurantId,Long tabledId) throws BadRequestAlertException {
+    public List<CartItemDTO> findAllCartItems(Long restaurantId,Long tabledId) throws BadRequestAlertException, JsonProcessingException {
         Optional<Tables> optionalTable = tableRepository.findByIdAndDeleted(tabledId,false);
         if (optionalTable.isEmpty()) {
             throw new BadRequestAlertException("Table Not Found", ENTITY_NAME, "tableNotFound");
         }
         String cartKey=Constants.CART_KEY+Constants.REDIS_SEPARATOR+restaurantId+Constants.REDIS_SEPARATOR+tabledId;
 
-        return (List<CartItemDTO>) genericRedisRepository.get(cartKey);
+        return cartRepository.getCartItems(cartKey);
     }
 
     @Override
-    public List<CartItemDTO> deleteCartItem(Long restaurantId,Long tableId, Long cartItemId) throws BadRequestAlertException {
+    public List<CartItemDTO> deleteCartItem(Long restaurantId,Long tableId, Long cartItemId) throws BadRequestAlertException, JsonProcessingException {
         Optional<Tables> optionalTable = tableRepository.findByIdAndDeleted(tableId,false);
         if (optionalTable.isEmpty()) {
             throw new BadRequestAlertException("Table Not Found", ENTITY_NAME, "tableNotFound");
@@ -89,7 +91,7 @@ public class CartServiceImpl implements CartService {
 
         String cartKey=Constants.CART_KEY+Constants.REDIS_SEPARATOR+restaurantId+Constants.REDIS_SEPARATOR+tableId;
 
-        List<CartItemDTO> cartItems = (List<CartItemDTO>) genericRedisRepository.get(cartKey);
+        List<CartItemDTO> cartItems = cartRepository.getCartItems(cartKey);
 
         if (cartItems == null) cartItems = new ArrayList<>();
 
@@ -99,7 +101,7 @@ public class CartServiceImpl implements CartService {
                 break;
             }
         }
-        genericRedisRepository.save(cartKey, cartItems, 60L, TimeUnit.MINUTES);
+        cartRepository.saveCartItems(cartKey, cartItems, 60L, TimeUnit.MINUTES);
         return cartItems;
     }
 
@@ -108,6 +110,6 @@ public class CartServiceImpl implements CartService {
 
         String cartKey=Constants.CART_KEY+Constants.REDIS_SEPARATOR+restaurantId+Constants.REDIS_SEPARATOR+tableId;
 
-        genericRedisRepository.delete(cartKey);
+        cartRepository.deleteCart(cartKey);
     }
 }

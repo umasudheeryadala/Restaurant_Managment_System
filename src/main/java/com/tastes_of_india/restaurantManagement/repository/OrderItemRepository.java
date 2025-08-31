@@ -20,4 +20,6 @@ public interface OrderItemRepository extends JpaRepository<OrderItem,Long> {
     Optional<OrderItem> findByIdAndStatusNotIn(Long itemId, List<OrderItemStatus> orderItemStatuses);
 
     List<OrderItem> findAllByOrderIdAndOrderTableRestaurantId(Long orderId,Long restaurantId);
+
+
 }

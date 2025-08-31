@@ -4,13 +4,14 @@ import com.tastes_of_india.restaurantManagement.domain.enumeration.PaymentStatus
 import com.tastes_of_india.restaurantManagement.domain.enumeration.PaymentType;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 
 @Entity
 @Table(name = "payment")
-public class Payment {
+public class Payment implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE , generator = "sequenceGenerator")

@@ -6,6 +6,7 @@ import com.tastes_of_india.restaurantManagement.service.MenuItemService;
 import com.tastes_of_india.restaurantManagement.service.dto.ImageDTO;
 import com.tastes_of_india.restaurantManagement.service.dto.MenuItemDTO;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
+import io.minio.errors.*;
 import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -47,14 +50,14 @@ public class MenuItemResource {
 
     @AuthorizeApiAccess(designation = {Designation.COOK,Designation.MANAGER,Designation.OWNER})
     @PostMapping(value = "/restaurants/{restaurantId}/menu_categories/{categoryId}/menuItems")
-    public ResponseEntity<MenuItemDTO> saveMenuItem(@PathVariable Long restaurantId,@PathVariable Long categoryId, @RequestBody MenuItemDTO menuItemDTO) throws IOException, BadRequestAlertException {
+    public ResponseEntity<MenuItemDTO> saveMenuItem(@PathVariable Long restaurantId,@PathVariable Long categoryId, @RequestBody MenuItemDTO menuItemDTO) throws IOException, BadRequestAlertException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         MenuItemDTO result=menuItemService.saveMenuItem(restaurantId,menuItemDTO,categoryId);
         return ResponseEntity.ok(result);
     }
 
     @AuthorizeApiAccess(designation = {Designation.COOK,Designation.MANAGER,Designation.OWNER})
     @PutMapping(value = "/restaurants/{restaurantId}/menu_categories/{categoryId}/menuItems/{menuItemId}")
-    public ResponseEntity<MenuItemDTO> updateMenuItem(@PathVariable Long restaurantId,@PathVariable Long categoryId,@PathVariable Long menuItemId,@RequestBody MenuItemDTO menuItemDTO) throws BadRequestAlertException, IOException {
+    public ResponseEntity<MenuItemDTO> updateMenuItem(@PathVariable Long restaurantId,@PathVariable Long categoryId,@PathVariable Long menuItemId,@RequestBody MenuItemDTO menuItemDTO) throws BadRequestAlertException, IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
         if(menuItemDTO.getId()==null){
             throw new BadRequestAlertException("Menu Item Id Not Found",ENTITY_NAME,"menuItemIdNotFound");
@@ -70,7 +73,7 @@ public class MenuItemResource {
 
     @AuthorizeApiAccess(designation = {Designation.COOK,Designation.MANAGER,Designation.OWNER})
     @PostMapping(value = "/restaurants/{restaurantId}/menuItem/{itemId}/uploadImages")
-    public ResponseEntity<List<ImageDTO>> uploadMenuItemImages(@PathVariable Long restaurantId, @PathVariable Long itemId, @RequestParam("file") List<MultipartFile> multipartFiles) throws BadRequestAlertException, IOException {
+    public ResponseEntity<List<ImageDTO>> uploadMenuItemImages(@PathVariable Long restaurantId, @PathVariable Long itemId, @RequestParam("file") List<MultipartFile> multipartFiles) throws BadRequestAlertException, IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         return ResponseEntity.ok(menuItemService.uploadImages(itemId,multipartFiles));
     }
 }

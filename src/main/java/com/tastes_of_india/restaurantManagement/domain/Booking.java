@@ -4,12 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.BookingStatus;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
 @Entity
 @Table(name = "booking")
-public class Booking {
+public class Booking implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")

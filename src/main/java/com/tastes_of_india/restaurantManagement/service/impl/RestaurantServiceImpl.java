@@ -1,8 +1,8 @@
 package com.tastes_of_india.restaurantManagement.service.impl;
 
-import com.tastes_of_india.restaurantManagement.service.mapper.EmployeeMapper;
+import com.tastes_of_india.restaurantManagement.service.FileService;
 import com.tastes_of_india.restaurantManagement.service.mapper.RestaurantEmployeeMapper;
-import com.tastes_of_india.restaurantManagement.service.util.FileUtil;
+import com.tastes_of_india.restaurantManagement.service.util.storage.LocalStorage;
 import com.tastes_of_india.restaurantManagement.domain.Employee;
 import com.tastes_of_india.restaurantManagement.domain.Restaurant;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.Designation;
@@ -13,6 +13,7 @@ import com.tastes_of_india.restaurantManagement.service.dto.RestaurantDTO;
 import com.tastes_of_india.restaurantManagement.service.dto.RestaurantEmployeeDTO;
 import com.tastes_of_india.restaurantManagement.service.mapper.RestaurantMapper;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
+import io.minio.errors.*;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -39,16 +43,19 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     private final RestaurantEmployeeMapper restaurantEmployeeMapper;
 
+    private final FileService fileService;
 
-    public RestaurantServiceImpl(RestaurantRepository restaurantRepository, EmployeeService employeeService, RestaurantMapper restaurantMapper, RestaurantEmployeeMapper restaurantEmployeeMapper) {
+
+    public RestaurantServiceImpl(RestaurantRepository restaurantRepository, EmployeeService employeeService, RestaurantMapper restaurantMapper, RestaurantEmployeeMapper restaurantEmployeeMapper, FileService fileService) {
         this.restaurantRepository = restaurantRepository;
         this.employeeService = employeeService;
         this.restaurantMapper = restaurantMapper;
         this.restaurantEmployeeMapper = restaurantEmployeeMapper;
+        this.fileService = fileService;
     }
 
     @Override
-    public RestaurantDTO saveRestaurant(RestaurantDTO restaurantDTO) throws BadRequestAlertException, IOException {
+    public RestaurantDTO saveRestaurant(RestaurantDTO restaurantDTO) throws BadRequestAlertException, IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
         Employee employee=employeeService.getCurrentlyLoggedInUser();
 
@@ -58,8 +65,8 @@ public class RestaurantServiceImpl implements RestaurantService {
             );
             restaurantMapper.partialUpdate(restaurant,restaurantDTO);
             if(restaurantDTO.getImage()!=null) {
-                FileUtil.deleteFile(restaurant.getLogoUrl());
-                restaurant.setLogoUrl(FileUtil.saveFile(restaurantDTO.getImage(), restaurant.getId()));
+                fileService.deleteFiles(List.of(restaurant.getLogoUrl()));
+                restaurant.setLogoUrl(fileService.saveFiles(List.of(restaurantDTO.getImage()), restaurant.getId()).get(0));
             }
             restaurantRepository.save(restaurant);
             RestaurantEmployeeDTO employeeDTO=new RestaurantEmployeeDTO();
@@ -84,7 +91,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         newRestaurant.setCreatedBy(employee);
         restaurantRepository.save(newRestaurant);
         if(restaurantDTO.getImage()!=null){
-            newRestaurant.setLogoUrl(FileUtil.saveFile(restaurantDTO.getImage(),newRestaurant.getId()));
+            newRestaurant.setLogoUrl(fileService.saveFiles(List.of(restaurantDTO.getImage()),newRestaurant.getId()).get(0));
         }
         restaurantRepository.save(newRestaurant);
         RestaurantEmployeeDTO restaurantEmployeeDTO=new RestaurantEmployeeDTO();

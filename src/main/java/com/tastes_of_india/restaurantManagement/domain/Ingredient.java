@@ -2,11 +2,12 @@ package com.tastes_of_india.restaurantManagement.domain;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.util.Set;
 
 @Entity
 @Table(name = "ingredient")
-public class Ingredient {
+public class Ingredient implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")

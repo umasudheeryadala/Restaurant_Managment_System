@@ -5,13 +5,14 @@ import com.tastes_of_india.restaurantManagement.domain.enumeration.Designation;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.Gender;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 
 @Entity
 @Table(name = "employee")
-public class Employee {
+public class Employee implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")

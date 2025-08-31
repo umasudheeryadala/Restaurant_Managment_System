@@ -1,6 +1,7 @@
 package com.tastes_of_india.restaurantManagement.service.impl;
 
 import com.tastes_of_india.restaurantManagement.config.Constants;
+import com.tastes_of_india.restaurantManagement.service.FileService;
 import com.tastes_of_india.restaurantManagement.service.OrderItemService;
 import com.tastes_of_india.restaurantManagement.service.dto.MenuItemDTO;
 import com.tastes_of_india.restaurantManagement.service.dto.OrderItemDTO;
@@ -8,7 +9,7 @@ import com.tastes_of_india.restaurantManagement.service.dto.PaymentDTO;
 import com.tastes_of_india.restaurantManagement.service.mapper.PaymentMapper;
 import com.tastes_of_india.restaurantManagement.service.payment.PaymentFactory;
 import com.tastes_of_india.restaurantManagement.service.payment.PaymentProcessor;
-import com.tastes_of_india.restaurantManagement.service.util.FileUtil;
+import com.tastes_of_india.restaurantManagement.service.util.storage.LocalStorage;
 import com.tastes_of_india.restaurantManagement.domain.*;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.OrderItemStatus;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.PaymentStatus;
@@ -19,6 +20,7 @@ import com.tastes_of_india.restaurantManagement.repository.RestaurantRepository;
 import com.tastes_of_india.restaurantManagement.service.OrderService;
 import com.tastes_of_india.restaurantManagement.service.PaymentService;
 import com.tastes_of_india.restaurantManagement.web.rest.error.BadRequestAlertException;
+import io.minio.errors.*;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.List;
@@ -56,18 +60,21 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final OrderItemService orderItemService;
 
+    private final FileService fileService;
 
-    public PaymentServiceImpl(RestaurantRepository restaurantRepository, OrderRepository orderRepository, PaymentRepository paymentRepository, OrderService orderService, PaymentMapper paymentMapper, OrderItemService orderItemService) {
+
+    public PaymentServiceImpl(RestaurantRepository restaurantRepository, OrderRepository orderRepository, PaymentRepository paymentRepository, OrderService orderService, PaymentMapper paymentMapper, OrderItemService orderItemService, FileService fileService) {
         this.restaurantRepository = restaurantRepository;
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
         this.orderService = orderService;
         this.paymentMapper = paymentMapper;
         this.orderItemService = orderItemService;
+        this.fileService = fileService;
     }
 
     @Override
-    public PaymentDTO pay(Long orderId, Long tableId, Long restaurantId, PaymentType paymentType) throws BadRequestAlertException, IOException {
+    public PaymentDTO pay(Long orderId, Long tableId, Long restaurantId, PaymentType paymentType) throws BadRequestAlertException, IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         Restaurant restaurant=restaurantRepository.findByIdAndDeleted(restaurantId,false).orElseThrow(
                 () -> new BadRequestAlertException("Restaurant Not Found",ENTITY_NAME,"restaurantNotFound")
         );
@@ -94,11 +101,11 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public byte[] getPaymentReceipt(Long paymentId) throws BadRequestAlertException, IOException {
+    public byte[] getPaymentReceipt(Long paymentId) throws BadRequestAlertException, IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         Payment payment=paymentRepository.findById(paymentId).orElseThrow(
                 () -> new BadRequestAlertException("Payment With Id Not Found",ENTITY_NAME,"paymentNotFound")
         );
-        byte[] result= FileUtil.getFile(payment.getBillUrl());
+        byte[] result= fileService.getFile(payment.getBillUrl());
         return result;
     }
 
@@ -133,7 +140,7 @@ public class PaymentServiceImpl implements PaymentService {
         return payment;
     }
 
-    private byte[] generateBill(Restaurant restaurant,Order order,Payment payment) throws IOException, BadRequestAlertException {
+    private byte[] generateBill(Restaurant restaurant,Order order,Payment payment) throws IOException, BadRequestAlertException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         String htmlTemplate = new String(
                 Objects.requireNonNull(getClass().getResourceAsStream("/templates/order-receipt.html")).readAllBytes(),
                 StandardCharsets.UTF_8);
@@ -155,7 +162,7 @@ public class PaymentServiceImpl implements PaymentService {
                     .append("</tr>");
         }
 
-        String image= Base64.getEncoder().encodeToString(FileUtil.getFile(restaurant.getLogoUrl()));
+        String image= Base64.getEncoder().encodeToString(fileService.getFile(restaurant.getLogoUrl()));
         // Replace placeholders
         String filledHtml = htmlTemplate
                 .replace("${image}",image)
@@ -177,7 +184,7 @@ public class PaymentServiceImpl implements PaymentService {
         renderer.layout();
         renderer.createPDF(baos);
         renderer.finishPDF();
-        String fileName= FileUtil.saveFile(baos.toByteArray(), payment.getId()+ Constants.FILE_SEPARATOR +pdfFileName);
+        String fileName= fileService.saveFile(baos.toByteArray(), payment.getId()+ Constants.FILE_SEPARATOR +pdfFileName);
         LOG.debug("PDF file name: {}",fileName);
         payment.setBillUrl(fileName);
         payment.setTotalAmount(BigDecimal.valueOf(totalAmount));

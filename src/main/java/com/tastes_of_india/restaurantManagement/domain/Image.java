@@ -3,9 +3,11 @@ package com.tastes_of_india.restaurantManagement.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name = "image")
-public class Image {
+public class Image implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE , generator = "sequence_generator")

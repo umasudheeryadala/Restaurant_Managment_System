@@ -3,9 +3,11 @@ package com.tastes_of_india.restaurantManagement.domain;
 import com.tastes_of_india.restaurantManagement.domain.enumeration.Designation;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name = "restaurant_employee")
-public class RestaurantEmployee {
+public class RestaurantEmployee implements Serializable {
 
 
     @EmbeddedId

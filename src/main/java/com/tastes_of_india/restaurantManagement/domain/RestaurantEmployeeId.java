@@ -2,10 +2,11 @@ package com.tastes_of_india.restaurantManagement.domain;
 
 import jakarta.persistence.Embeddable;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-public class RestaurantEmployeeId {
+public class RestaurantEmployeeId implements Serializable {
 
     private Long restaurantId;
 
